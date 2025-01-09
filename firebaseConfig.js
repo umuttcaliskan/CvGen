@@ -1,7 +1,8 @@
 import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import firebase from "firebase/compat/app";
+import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
+import 'firebase/compat/firestore'; // Firestore'u içe aktar
 
 const firebaseConfig = {
     apiKey: "AIzaSyCFJpwHV1q2bT0UuQ5yuTDV5dKkX6lCnik",
@@ -24,4 +25,7 @@ if (!firebase.apps.length) {
     });
 }
 
-export default firebase;
+// Firestore örneğini oluştur
+const firestore = firebase.firestore();
+
+export { firebase, firestore }; // Hem firebase hem de firestore'u dışa aktar

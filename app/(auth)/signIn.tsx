@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, Button } from 'react-native';
 import { Link, router } from 'expo-router';
-import firebase from '../../firebaseConfig';
+import {firebase} from '../../firebaseConfig';
 import { useAuth } from '../../context/AuthContext';
 
 const LoginScreen: React.FC = () => {

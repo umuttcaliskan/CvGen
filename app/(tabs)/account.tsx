@@ -3,21 +3,16 @@ import { SafeAreaView, ScrollView, View, Text, TouchableOpacity } from 'react-na
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { getAuth, signOut } from 'firebase/auth';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
 import ProfileButton from '../../components/ProfileComponents/ProfileButton';
 import ProfileSwitch from '../../components/ProfileComponents/ProfileSwitch';
 import Preference from '../../components/ProfileComponents/Preference';
+import { useAuth } from '../../context/AuthContext';
 
 const Profile = () => {
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const { user, userData } = useAuth();
   const router = useRouter();
-
-  useEffect(() => {
-    const auth = getAuth();
-    const user = auth.currentUser;
-    if (user) {
-      setCurrentUser(user);
-    }
-  }, []);
 
   const handleLogout = async () => {
     try {
@@ -29,7 +24,7 @@ const Profile = () => {
     }
   };
 
-  if (!currentUser) {
+  if (!user || !userData) {
     return (
       <View className="flex-1 justify-center items-center">
         <Text className="text-lg text-gray-600">Yükleniyor...</Text>
@@ -37,7 +32,7 @@ const Profile = () => {
     );
   }
 
-  const emailFirstLetter = currentUser.email.charAt(0).toUpperCase();
+  const emailFirstLetter = user.email?.charAt(0).toUpperCase() || 'U';
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
@@ -52,10 +47,13 @@ const Profile = () => {
         {/* Hesap Bilgileri */}
         <View className="py-4">
           <Text className="text-xs uppercase text-gray-500 ml-3 mb-2">Hesabım</Text>
-          <TouchableOpacity className="flex-row items-center bg-white rounded-xl p-4 shadow-sm">
+          <TouchableOpacity 
+            onPress={() => router.push('/(screens)/editProfile')}
+            className="flex-row items-center bg-white rounded-xl p-4 shadow-sm"
+          >
             <View className="flex-grow">
-              <Text className="text-lg font-semibold text-gray-900">{currentUser.displayName}</Text>
-              <Text className="text-gray-500">{currentUser.email}</Text>
+              <Text className="text-lg font-semibold text-gray-900">{userData.fullName}</Text>
+              <Text className="text-gray-500">{user.email}</Text>
             </View>
             <Feather name="chevron-right" size={18} color="black" />
           </TouchableOpacity>
