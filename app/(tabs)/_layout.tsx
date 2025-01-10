@@ -13,15 +13,31 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: true,
-        tabBarStyle: [
-          Platform.select({
-            ios: {
-              position: 'absolute',
-            },
-            default: {},
-          }),
-          styles.tabBar,
-        ],
+        tabBarStyle: Platform.select({
+          ios: {
+            marginHorizontal: 16,
+            marginBottom: 16,
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: '#ccc',
+            backgroundColor: "white",
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            position: 'absolute',
+            bottom: 0,
+          },
+          android: {
+            marginHorizontal: 16,
+            marginBottom: 16,
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: '#ccc',
+            backgroundColor: "white",
+            elevation: 4,
+          }
+        }),
       }}>
       <Tabs.Screen
         name="home"
@@ -42,7 +58,7 @@ export default function TabLayout() {
             <Feather
               name="home"
               size={18}
-              color={focused ? '#0a7ea4' : 'black'} // Aktif olduğunda mavi olacak
+              color={focused ? '#0a7ea4' : 'black'}
             />
           ),
           title: 'Anasayfa'
@@ -62,7 +78,7 @@ export default function TabLayout() {
             <Feather
               name="plus-circle"
               size={18}
-              color={focused ? '#0a7ea4' : 'black'} // Aktif olduğunda mavi olacak
+              color={focused ? '#0a7ea4' : 'black'}
             />
           ),
           title: 'CV Oluştur'
@@ -82,7 +98,7 @@ export default function TabLayout() {
             <Feather
               name="user"
               size={18}
-              color={focused ? '#0a7ea4' : 'black'} // Aktif olduğunda mavi olacak
+              color={focused ? '#0a7ea4' : 'black'}
             />
           ),
           title: 'Hesabım'
@@ -91,19 +107,3 @@ export default function TabLayout() {
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({
-  tabBar: {
-    marginHorizontal: 16, // Sağdan ve soldan boşluk
-    marginBottom: 16, // Alttan boşluk
-    borderRadius: 16, // Yuvarlak köşeler
-    borderWidth: 1, // Sınır genişliği
-    borderColor: '#ccc', // Sınır rengi
-    backgroundColor: "white", // Arkaplan rengi
-    elevation: 4, // Android için gölge efekti
-    shadowColor: '#000', // iOS için gölge rengi
-    shadowOffset: { width: 0, height: 4 }, // iOS için gölge konumu
-    shadowOpacity: 0.1, // iOS için gölge opaklığı
-    shadowRadius: 4, // iOS için gölge yarıçapı
-  },
-});

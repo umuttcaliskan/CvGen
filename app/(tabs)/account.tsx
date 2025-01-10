@@ -32,7 +32,7 @@ const Profile = () => {
     );
   }
 
-  const emailFirstLetter = user.email?.charAt(0).toUpperCase() || 'U';
+  const nameFirstLetter = userData?.fullName?.charAt(0).toUpperCase() || 'U';
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
@@ -40,7 +40,7 @@ const Profile = () => {
         {/* Profil Resmi */}
         <View className="items-center mt-12 mb-8">
           <View className="w-20 h-20 border border-secondary rounded-lg flex justify-center items-center bg-blue-900">
-            <Text className="text-4xl text-white font-semibold">{emailFirstLetter}</Text>
+            <Text className="text-4xl text-white font-semibold">{nameFirstLetter}</Text>
           </View>
         </View>
 
@@ -59,7 +59,6 @@ const Profile = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Tercihler */}
         <View className="py-4">
           <Text className="text-xs uppercase text-gray-500 ml-3 mb-2">Tercihler</Text>
           <View className="space-y-3">
@@ -78,7 +77,6 @@ const Profile = () => {
           </View>
         </View>
 
-        {/* Kaynaklar */}
         <View className="py-4">
           <Text className="text-xs uppercase text-gray-500 ml-3 mb-2">Kaynaklar</Text>
           <View className="space-y-3">
@@ -89,7 +87,6 @@ const Profile = () => {
           </View>
         </View>
 
-        {/* Çıkış Yap */}
         <View className="py-6">
           <TouchableOpacity onPress={handleLogout}>
             <View className="flex-row justify-center bg-white p-4 rounded-xl border shadow-sm">
@@ -98,7 +95,6 @@ const Profile = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Alt Bilgi */}
         <View className="mt-6">
           <Text className="text-xs text-gray-400 text-center">Powered by PickSoSo</Text>
           <Text className="text-[8px] text-gray-400 text-center mt-1">Version 1.0.0</Text>

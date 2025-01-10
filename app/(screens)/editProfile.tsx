@@ -140,13 +140,11 @@ const EditProfileScreen: React.FC = () => {
       />
 
       <ScrollView className="flex-1 px-4 py-6">
-        {/* Profil Bilgileri Kartı */}
         <View className="bg-white rounded-xl p-6 shadow-sm mb-6">
           <Text className="text-lg font-semibold text-gray-900 mb-4">
             Profil Bilgileri
           </Text>
 
-          {/* Ad Soyad Input */}
           <View className="mb-6">
             <Text className="text-sm font-medium text-gray-700 mb-2">
               Ad Soyad
@@ -181,7 +179,6 @@ const EditProfileScreen: React.FC = () => {
             Şifre Değiştir
           </Text>
 
-          {/* Mevcut Şifre */}
           <View className="mb-4">
             <Text className="text-sm font-medium text-gray-700 mb-2">
               Mevcut Şifre
@@ -207,7 +204,6 @@ const EditProfileScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* Yeni Şifre */}
           <View className="mb-4">
             <Text className="text-sm font-medium text-gray-700 mb-2">
               Yeni Şifre
@@ -233,7 +229,7 @@ const EditProfileScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* Yeni Şifre Tekrar */}
+
           <View className="mb-6">
             <Text className="text-sm font-medium text-gray-700 mb-2">
               Yeni Şifre Tekrar
@@ -260,7 +256,6 @@ const EditProfileScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Kaydet Butonu */}
         <TouchableOpacity
           onPress={handleUpdate}
           disabled={loading}

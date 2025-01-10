@@ -74,7 +74,6 @@ const SignUpScreen: React.FC = () => {
         keyboardType="default"
       />
 
-      {/* Doğum Tarihi Seçimi */}
       <TouchableOpacity onPress={showDatePicker}>
         <View className="h-14 border-2 border-gray-300 rounded-lg px-4 mb-5 bg-white justify-center">
           <Text className="text-gray-500">{birthDate || 'Doğum Tarihini Seçin (GG-AA-YYYY)'}</Text>
@@ -118,7 +117,6 @@ const SignUpScreen: React.FC = () => {
         <Text className="text-center text-xs text-gray-600">Powered by PickSoSo</Text>
       </View>
 
-      {/* Date Picker Modal */}
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"

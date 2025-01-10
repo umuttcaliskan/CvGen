@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView, SafeAreaView } from 'react-native';
 import { Stack } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-import { firebase } from '../../firebaseConfig';
+import { firebase } from '../../firebase.config';
 import { useAuth } from '../../context/AuthContext';
 
 const ReportScreen: React.FC = () => {
@@ -20,26 +20,40 @@ const ReportScreen: React.FC = () => {
 
     setLoading(true);
     try {
+      const currentUser = firebase.auth().currentUser;
+      
+      if (!currentUser) {
+        Alert.alert('Hata', 'Lütfen önce giriş yapın.');
+        return;
+      }
+
+      // Firestore'a rapor verilerini kaydet
       await firebase.firestore().collection('reports').add({
-        title,
-        description,
-        device,
-        userEmail: userData?.email,
+        userId: currentUser.uid,
+        title: title.trim(),
+        description: description.trim(),
+        device: device.trim(),
+        userEmail: userData?.email || currentUser.email,
         userName: userData?.fullName,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        status: 'pending'
+        status: 'pending',
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
       Alert.alert(
         'Başarılı',
         'Hata bildiriminiz başarıyla gönderildi. En kısa sürede incelenecektir.',
-        [{ text: 'Tamam', onPress: () => {
-          setTitle('');
-          setDescription('');
-          setDevice('');
-        }}]
+        [{ 
+          text: 'Tamam', 
+          onPress: () => {
+            setTitle('');
+            setDescription('');
+            setDevice('');
+          }
+        }]
       );
     } catch (error) {
+      console.error('Hata bildirimi gönderilirken hata:', error);
       Alert.alert('Hata', 'Bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
     } finally {
       setLoading(false);
@@ -69,7 +83,6 @@ const ReportScreen: React.FC = () => {
             Uygulamada karşılaştığınız sorunları bize bildirerek daha iyi bir deneyim sunmamıza yardımcı olabilirsiniz.
           </Text>
 
-          {/* Başlık Input */}
           <View className="mb-4">
             <Text className="text-sm font-medium text-gray-700 mb-2">
               Hata Başlığı
@@ -83,7 +96,6 @@ const ReportScreen: React.FC = () => {
             />
           </View>
 
-          {/* Açıklama Input */}
           <View className="mb-4">
             <Text className="text-sm font-medium text-gray-700 mb-2">
               Hata Açıklaması
@@ -100,7 +112,6 @@ const ReportScreen: React.FC = () => {
             />
           </View>
 
-          {/* Cihaz Bilgisi Input */}
           <View className="mb-6">
             <Text className="text-sm font-medium text-gray-700 mb-2">
               Cihaz Modeli (Opsiyonel)
@@ -113,7 +124,6 @@ const ReportScreen: React.FC = () => {
             />
           </View>
 
-          {/* Gönder Butonu */}
           <TouchableOpacity
             onPress={handleSubmit}
             disabled={loading}
@@ -130,7 +140,6 @@ const ReportScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Bilgi Kartı */}
         <View className="bg-blue-50 rounded-xl p-4">
           <Text className="text-sm text-blue-800">
             Not: Hata bildiriminiz ekibimiz tarafından incelenecek ve gerekli düzeltmeler yapılacaktır. Bildiriminizle ilgili gelişmeler e-posta adresinize iletilecektir.

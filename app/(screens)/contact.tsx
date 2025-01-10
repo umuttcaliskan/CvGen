@@ -4,9 +4,7 @@ import { View, Text, Linking, TouchableOpacity, Image } from 'react-native';
 const Contact = () => {
   return (
     <View className="flex-1 bg-gray-100 justify-center items-center px-4 py-8">
-      {/* Kart */}
       <View className="w-full max-w-md bg-white rounded-xl shadow-md p-6">
-        {/* Başlık */}
         <Image
           source={require('../../assets/images/splash-icon.png')}
           className="mx-auto w-[250px] h-[60px] mb-12"
@@ -16,9 +14,6 @@ const Contact = () => {
           Geleceği inşa eden yazılım çözümleriyle her zaman yanınızdayız. İhtiyaçlarınızı karşılamak ve sorularınızı yanıtlamak için aşağıdaki iletişim kanallarından bize ulaşabilirsiniz.
         </Text>
 
-        
-
-        {/* Destek Maili */}
         <TouchableOpacity
           onPress={() => Linking.openURL('mailto:destek@picksoso.com')}
           className="flex-row items-center justify-between mb-4 bg-gray-100 rounded-lg p-4"
@@ -27,7 +22,6 @@ const Contact = () => {
           <Text className="text-blue-600 font-semibold">destek@picksoso.com</Text>
         </TouchableOpacity>
 
-        {/* Web Sitesi */}
         <TouchableOpacity
           onPress={() => Linking.openURL('https://www.picksoso.com')}
           className="flex-row items-center justify-between bg-gray-100 rounded-lg p-4 mb-4"
@@ -36,7 +30,6 @@ const Contact = () => {
           <Text className="text-blue-600 font-semibold">www.picksoso.com</Text>
         </TouchableOpacity>
 
-        {/* Telefon Numarası */}
         <TouchableOpacity
           onPress={() => Linking.openURL('tel:05353698689')}
           className="bg-gray-100 rounded-lg p-4 mb-4"

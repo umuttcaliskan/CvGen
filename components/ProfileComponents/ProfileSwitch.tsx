@@ -59,7 +59,7 @@ const ProfileSwitch: React.FC<ProfileSwitchProps> = ({ title, icon, type }) => {
 
   return (
     <View className="flex-row items-center bg-white p-4 rounded-lg shadow-sm mb-2">
-      <Feather name={icon} size={20} color="#4A4A4A" className="mr-3" />
+      <Feather name={icon as any} size={20} color="#4A4A4A" className="mr-3" />
       <Text className="text-base text-black flex-grow ml-3">{title}</Text>
       <Switch
         onValueChange={toggleSwitch}
