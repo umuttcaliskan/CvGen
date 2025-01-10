@@ -65,8 +65,16 @@ const Profile = () => {
           <View className="space-y-3">
             <Preference title="Dil" description="Türkçe" icon={"globe"} />
             <Preference title="Konum" description="İstanbul, Türkiye" icon={"map-pin"} />
-            <ProfileSwitch title="E-Posta Bildirimleri" icon={"mail"} />
-            <ProfileSwitch title="Anlık Bildirimler" icon={"bell-off"} />
+            <ProfileSwitch 
+              title="E-Posta Bildirimleri" 
+              icon="mail" 
+              type="emailNotifications" 
+            />
+            <ProfileSwitch 
+              title="Anlık Bildirimler" 
+              icon="bell" 
+              type="pushNotifications" 
+            />
           </View>
         </View>
 
