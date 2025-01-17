@@ -25,10 +25,10 @@ const SplashScreen = () => {
   return (
     <SafeAreaView className="flex-1 bg-blue-900">
       <View className="flex-1 justify-center items-center">
-        {/* Logo */}
+      
         <Image
-          source={{ uri: 'https://via.placeholder.com/150' }}
-          className="w-40 h-40"
+          source={require('../assets/images/blackLogo.png')}
+          className="w-[400px] h-[120px]"
           resizeMode="contain"
         />
 

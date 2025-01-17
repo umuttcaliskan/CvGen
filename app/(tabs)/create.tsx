@@ -174,7 +174,6 @@ const CreateScreen = () => {
       console.log('CV başarıyla oluşturuldu:', cvRef.id);
       Alert.alert('Başarılı', 'CV\'niz başarıyla oluşturuldu!');
       
-      // Formları sıfırla
       setCvData({
         personal: null,
         about: null,
@@ -186,7 +185,6 @@ const CreateScreen = () => {
         references: null
       });
 
-      // Tamamlanma durumlarını sıfırla
       const resetSections = cvSections.map(section => ({
         ...section,
         completed: false

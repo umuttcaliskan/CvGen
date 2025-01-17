@@ -5,13 +5,13 @@ import 'firebase/compat/auth';
 import 'firebase/compat/firestore'; // Firestore'u içe aktar
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCFJpwHV1q2bT0UuQ5yuTDV5dKkX6lCnik",
-    authDomain: "cvmaker-picksoso.firebaseapp.com",
-    projectId: "cvmaker-picksoso",
-    storageBucket: "cvmaker-picksoso.firebasestorage.app",
-    messagingSenderId: "335512632108",
-    appId: "1:335512632108:web:1792e749aeca39e7ce0a89",
-    measurementId: "G-CC1LVV853P"
+    apiKey: "AIzaSyCykOQkK07hUbrhiFfl6J8ma7cCb1H4ipQ",
+    authDomain: "resumebuilder-picksoso.firebaseapp.com",
+    projectId: "resumebuilder-picksoso",
+    storageBucket: "resumebuilder-picksoso.firebasestorage.app",
+    messagingSenderId: "934278391962",
+    appId: "1:934278391962:web:6068955921992528ac5723",
+    measurementId: "G-X6Z55TCGQK"
 };
 
 let app;

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, ScrollView, View, Text, TouchableOpacity } from 'react-native';
+import { SafeAreaView, ScrollView, View, Text, TouchableOpacity, Image } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { getAuth, signOut } from 'firebase/auth';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
+import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import ProfileButton from '../../components/ProfileComponents/ProfileButton';
 import ProfileSwitch from '../../components/ProfileComponents/ProfileSwitch';
 import Preference from '../../components/ProfileComponents/Preference';
@@ -13,14 +15,66 @@ import { useAuth } from '../../context/AuthContext';
 const Profile = () => {
   const { user, userData } = useAuth();
   const router = useRouter();
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user?.uid) {
+      loadProfileImage();
+    }
+  }, [user?.uid]);
+
+  const loadProfileImage = async () => {
+    try {
+      if (!user?.uid) return;
+      const storedImage = await AsyncStorage.getItem(`profileImage_${user.uid}`);
+      if (storedImage) {
+        setProfileImage(storedImage);
+      }
+    } catch (error) {
+      console.error('Profil resmi yüklenirken hata:', error);
+    }
+  };
+
+  const handleImagePick = async () => {
+    try {
+      if (!user?.uid) {
+        alert('Oturum açmanız gerekiyor!');
+        return;
+      }
+
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (!permissionResult.granted) {
+        alert('Galeriye erişim izni gereklidir!');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.5,
+      });
+
+      if (!result.canceled) {
+        const imageUri = result.assets[0].uri;
+        setProfileImage(imageUri);
+        await AsyncStorage.setItem(`profileImage_${user.uid}`, imageUri);
+      }
+    } catch (error) {
+      console.error('Resim seçilirken hata:', error);
+      alert('Resim seçilirken bir hata oluştu.');
+    }
+  };
 
   const handleLogout = async () => {
     try {
       const auth = getAuth();
       await signOut(auth);
+      setProfileImage(null);
       router.replace("/(auth)/signIn");
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error("Çıkış yaparken hata:", error);
     }
   };
 
@@ -38,11 +92,20 @@ const Profile = () => {
     <SafeAreaView className="flex-1 bg-gray-100">
       <ScrollView className="px-6">
         {/* Profil Resmi */}
-        <View className="items-center mt-12 mb-8">
-          <View className="w-20 h-20 border border-secondary rounded-lg flex justify-center items-center bg-blue-900">
-            <Text className="text-4xl text-white font-semibold">{nameFirstLetter}</Text>
+        <TouchableOpacity onPress={handleImagePick} className="items-center mt-12 mb-8">
+          <View className="w-20 h-20 border border-secondary rounded-lg flex justify-center items-center bg-blue-900 overflow-hidden">
+            {profileImage ? (
+              <Image 
+                source={{ uri: profileImage }} 
+                className="w-full h-full"
+                resizeMode="cover"
+              />
+            ) : (
+              <Text className="text-4xl text-white font-semibold">{nameFirstLetter}</Text>
+            )}
           </View>
-        </View>
+          <Text className="text-blue-600 mt-2 text-sm">Fotoğrafı Değiştir</Text>
+        </TouchableOpacity>
 
         {/* Hesap Bilgileri */}
         <View className="py-4">
