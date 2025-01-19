@@ -29,7 +29,7 @@ const LanguagesModal: React.FC<LanguagesModalProps> = ({ onClose, onSave, initia
     { label: 'B2 - İyi', value: 'B2' },
     { label: 'C1 - İleri', value: 'C1' },
     { label: 'C2 - Uzman', value: 'C2' },
-    { label: 'Anadil', value: 'native' }
+    { label: 'Anadil', value: 'Anadil' }
   ];
 
   const handleAddLanguage = () => {

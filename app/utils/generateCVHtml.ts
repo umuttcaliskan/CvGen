@@ -1,4 +1,6 @@
-interface CV {
+interface CVData {
+  id: string;
+  userId: string;
   personal?: {
     fullName: string;
     email: string;
@@ -30,208 +32,201 @@ interface CV {
     name: string;
     level: string;
   }>;
+  languages?: Array<{
+    id: string;
+    name: string;
+    level: string;
+  }>;
+  references?: Array<{
+    id: string;
+    fullName: string;
+    company: string;
+    position: string;
+    phone: string;
+    email: string;
+  }>;
+  createdAt: {
+    toDate: () => Date;
+  };
 }
 
-export const generateCVHtml = (cv: CV, profileImageUri?: string | null) => {
+export const generateCVHtml = (cv: CVData, profileImageUri: string | null): string => {
   return `
     <!DOCTYPE html>
-    <html lang="tr">
+    <html>
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${cv.personal?.fullName || 'CV'}</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                max-width: 800px;
-                margin: 0 auto;
-                padding: 20px;
-                line-height: 1.6;
-            }
-            
-            .header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 30px;
-            }
-            
-            .header h1 {
-                margin: 0;
-                font-size: 32px;
-            }
-            
-            .cv-badge {
-                background-color: #2196F3;
-                color: white;
-                padding: 8px 16px;
-                border-radius: 4px;
-                font-weight: bold;
-            }
-            
-            .contact-info {
-                margin-bottom: 30px;
-            }
-            
-            .personal-info {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
-                margin-bottom: 30px;
-            }
-            
-            .personal-info-item {
-                margin-bottom: 10px;
-            }
-            
-            .personal-info-item label {
-                font-weight: bold;
-                display: block;
-                margin-bottom: 5px;
-            }
-            
-            .section {
-                margin-bottom: 30px;
-            }
-            
-            .section h2 {
-                border-bottom: 2px solid #2196F3;
-                padding-bottom: 5px;
-                margin-bottom: 15px;
-            }
-            
-            .job {
-                margin-bottom: 20px;
-            }
-            
-            .job h3 {
-                margin-bottom: 5px;
-                color: #333;
-            }
-            
-            .job-location {
-                color: #666;
-                font-style: italic;
-                margin-bottom: 10px;
-            }
-            
-            .skills-grid {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-            
-            .skill-item {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 5px 0;
-            }
-            
-            .skill-level {
-                color: #666;
-            }
-
-            .profile-image {
-                width: 120px;
-                height: 120px;
-                border-radius: 60px;
-                object-fit: cover;
-                margin-right: 20px;
-            }
-
-            .header-content {
-                display: flex;
-                align-items: center;
-            }
-        </style>
+      <meta charset="utf-8">
+      <title>${cv.personal?.fullName || 'CV'}</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+          margin: 0;
+          padding: 20px;
+          color: #333;
+        }
+        .container {
+          max-width: 800px;
+          margin: 0 auto;
+          background: #fff;
+          padding: 30px;
+          box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+          text-align: center;
+          margin-bottom: 30px;
+        }
+        .profile-image {
+          width: 150px;
+          height: 150px;
+          border-radius: 50%;
+          object-fit: cover;
+          margin-bottom: 20px;
+        }
+        .name {
+          font-size: 28px;
+          font-weight: bold;
+          margin-bottom: 10px;
+          color: #2563eb;
+        }
+        .contact-info {
+          margin-bottom: 20px;
+          color: #666;
+        }
+        .section {
+          margin-bottom: 30px;
+        }
+        .section-title {
+          font-size: 20px;
+          font-weight: bold;
+          color: #2563eb;
+          border-bottom: 2px solid #2563eb;
+          padding-bottom: 5px;
+          margin-bottom: 15px;
+        }
+        .item {
+          margin-bottom: 20px;
+        }
+        .item-title {
+          font-weight: bold;
+          margin-bottom: 5px;
+        }
+        .item-subtitle {
+          color: #666;
+          font-style: italic;
+          margin-bottom: 5px;
+        }
+        .item-date {
+          color: #888;
+          font-size: 14px;
+          margin-bottom: 5px;
+        }
+        .item-description {
+          color: #444;
+        }
+        .skills-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
+        }
+        .skill-item {
+          display: flex;
+          justify-content: space-between;
+          padding: 5px 0;
+        }
+      </style>
     </head>
     <body>
+      <div class="container">
         <div class="header">
-            <div class="header-content">
-                ${profileImageUri ? `<img src="${profileImageUri}" class="profile-image" alt="Profile" />` : ''}
-                <h1>${cv.personal?.fullName?.toUpperCase() || 'CV'}</h1>
-            </div>
-            <div class="cv-badge">CV</div>
+          ${profileImageUri ? `<img src="data:image/jpeg;base64,${profileImageUri}" class="profile-image" alt="Profile" />` : ''}
+          <div class="name">${cv.personal?.fullName || 'İsimsiz'}</div>
+          <div class="contact-info">
+            ${cv.personal?.email ? `<div>📧 ${cv.personal.email}</div>` : ''}
+            ${cv.personal?.phone ? `<div>📱 ${cv.personal.phone}</div>` : ''}
+            ${cv.personal?.address ? `<div>📍 ${cv.personal.address}</div>` : ''}
+            ${cv.personal?.birthDate ? `<div>🎂 ${cv.personal.birthDate}</div>` : ''}
+          </div>
         </div>
-        
-        <div class="contact-info">
-            ${cv.personal?.address ? `<span>📍 ${cv.personal.address}</span> &nbsp;|&nbsp;` : ''}
-            ${cv.personal?.phone ? `<span>📞 ${cv.personal.phone}</span> &nbsp;|&nbsp;` : ''}
-            ${cv.personal?.email ? `<span>📧 ${cv.personal.email}</span>` : ''}
-        </div>
-        
-        <div class="personal-info">
-            ${cv.personal?.birthDate ? `
-                <div class="personal-info-item">
-                    <label>Doğum tarihi</label>
-                    ${cv.personal.birthDate}
-                </div>
-            ` : ''}
-            ${cv.personal?.gender ? `
-                <div class="personal-info-item">
-                    <label>Cinsiyet</label>
-                    ${cv.personal.gender}
-                </div>
-            ` : ''}
-            ${cv.personal?.maritalStatus ? `
-                <div class="personal-info-item">
-                    <label>Medeni durum</label>
-                    ${cv.personal.maritalStatus}
-                </div>
-            ` : ''}
-            ${cv.personal?.drivingLicense ? `
-                <div class="personal-info-item">
-                    <label>Sürücü ehliyeti</label>
-                    ${cv.personal.drivingLicense}
-                </div>
-            ` : ''}
-        </div>
-        
+
         ${cv.about ? `
-            <div class="section">
-                <p>${cv.about}</p>
-            </div>
+          <div class="section">
+            <div class="section-title">Hakkımda</div>
+            <div class="item-description">${cv.about}</div>
+          </div>
         ` : ''}
-        
+
         ${cv.experience && cv.experience.length > 0 ? `
-            <div class="section">
-                <h2>İş tecrübesi</h2>
-                ${cv.experience.map(exp => `
-                    <div class="job">
-                        <h3>${exp.position}</h3>
-                        <div class="job-location">${exp.companyName}, ${exp.startDate} - ${exp.endDate}</div>
-                        <p>${exp.description}</p>
-                    </div>
-                `).join('')}
-            </div>
+          <div class="section">
+            <div class="section-title">İş Deneyimi</div>
+            ${cv.experience.map(exp => `
+              <div class="item">
+                <div class="item-title">${exp.position}</div>
+                <div class="item-subtitle">${exp.companyName}</div>
+                <div class="item-date">${exp.startDate} - ${exp.endDate}</div>
+                <div class="item-description">${exp.description}</div>
+              </div>
+            `).join('')}
+          </div>
         ` : ''}
-        
+
         ${cv.education && cv.education.length > 0 ? `
-            <div class="section">
-                <h2>Eğitim</h2>
-                ${cv.education.map(edu => `
-                    <div class="job">
-                        <h3>${edu.schoolName}</h3>
-                        <div class="job-location">${edu.department}, ${edu.startDate} - ${edu.endDate}</div>
-                    </div>
-                `).join('')}
-            </div>
+          <div class="section">
+            <div class="section-title">Eğitim</div>
+            ${cv.education.map(edu => `
+              <div class="item">
+                <div class="item-title">${edu.schoolName}</div>
+                <div class="item-subtitle">${edu.department}</div>
+                <div class="item-date">${edu.startDate} - ${edu.endDate}</div>
+              </div>
+            `).join('')}
+          </div>
         ` : ''}
-        
+
         ${cv.skills && cv.skills.length > 0 ? `
-            <div class="section">
-                <h2>Beceriler</h2>
-                <div class="skills-grid">
-                    ${cv.skills.map(skill => `
-                        <div class="skill-item">
-                            <span>${skill.name}</span>
-                            <span class="skill-level">${skill.level}</span>
-                        </div>
-                    `).join('')}
+          <div class="section">
+            <div class="section-title">Beceriler</div>
+            <div class="skills-grid">
+              ${cv.skills.map(skill => `
+                <div class="skill-item">
+                  <span>${skill.name}</span>
+                  <span>${skill.level}</span>
                 </div>
+              `).join('')}
             </div>
+          </div>
         ` : ''}
+
+        ${cv.languages && cv.languages.length > 0 ? `
+          <div class="section">
+            <div class="section-title">Yabancı Diller</div>
+            <div class="skills-grid">
+              ${cv.languages.map(lang => `
+                <div class="skill-item">
+                  <span>${lang.name}</span>
+                  <span>${lang.level}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        ${cv.references && cv.references.length > 0 ? `
+          <div class="section">
+            <div class="section-title">Referanslar</div>
+            ${cv.references.map(ref => `
+              <div class="item">
+                <div class="item-title">${ref.fullName}</div>
+                <div class="item-subtitle">${ref.position} - ${ref.company}</div>
+                <div class="contact-info">
+                  <div>📧 ${ref.email}</div>
+                  <div>📱 ${ref.phone}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>
     </body>
     </html>
   `;

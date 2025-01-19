@@ -8,6 +8,7 @@ import Modal from 'react-native-modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system';
 import { generateCVHtml } from '../utils/generateCVHtml';
 import WebView from 'react-native-webview';
 
@@ -265,17 +266,14 @@ const CVCard: React.FC<CVCardProps> = ({ cv, onPress }) => {
 
   const handleViewPDF = async () => {
     try {
-      const html = generateCVHtml(cv, profileImage);
+      // Profil resmini yükle
+      const storedImage = await AsyncStorage.getItem(`profileImage_${cv.userId}`);
       
-      // PDF'i oluştur
-      const { uri } = await Print.printToFileAsync({
-        html,
-        base64: false
-      });
-      
+      // HTML oluştur ve profil resmini gönder
+      const html = generateCVHtml(cv, storedImage);
+      const { uri } = await Print.printToFileAsync({ html });
       setPdfUri(uri);
       setShowPDF(true);
-
     } catch (error) {
       console.error('PDF oluşturulurken hata:', error);
       Alert.alert('Hata', 'PDF oluşturulurken bir hata oluştu.');
@@ -333,8 +331,12 @@ const CVCard: React.FC<CVCardProps> = ({ cv, onPress }) => {
           </View>
           {pdfUri && (
             <WebView
-              source={{ uri: pdfUri }}
-              style={styles.webview}
+              source={{ uri: `file://${pdfUri}` }}
+              style={{ flex: 1 }}
+              originWhitelist={['*']}
+              mixedContentMode="always"
+              allowFileAccess={true}
+              allowUniversalAccessFromFileURLs={true}
             />
           )}
         </View>
@@ -438,7 +440,7 @@ const HomeScreen = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [pdfUri, setPdfUri] = useState<string | null>(null);
-  const [isPdfModalVisible, setIsPdfModalVisible] = useState(false);
+  const [showPDF, setShowPDF] = useState(false);
 
   useEffect(() => {
     const currentUser = firebase.auth().currentUser;
@@ -543,28 +545,40 @@ const HomeScreen = () => {
 
   const handleViewPDF = async (cv: CVData) => {
     try {
-      const html = generateCVHtml(cv, profileImage);
-      const options = {
+      // Profil resmini yükle
+      const storedImage = await AsyncStorage.getItem(`profileImage_${cv.userId}`);
+      
+      // HTML oluştur ve profil resmini gönder
+      const html = generateCVHtml(cv, storedImage);
+      
+      // PDF oluştur
+      const { uri } = await Print.printToFileAsync({
         html,
-        fileName: `CV_${cv.personal?.fullName || 'Untitled'}_${Date.now()}`,
-        directory: 'Documents',
-      };
-
-      const file = await RNHTMLtoPDF.convert(options);
-      if (file.filePath) {
-        setPdfUri(file.filePath);
-        setIsPdfModalVisible(true);
+        base64: false
+      });
+      
+      // PDF'i paylaş
+      if (!(await Sharing.isAvailableAsync())) {
+        Alert.alert('Hata', 'Paylaşım bu cihazda kullanılamıyor');
+        return;
       }
+      
+      await Sharing.shareAsync(uri, {
+        mimeType: 'application/pdf',
+        dialogTitle: 'CV\'yi İndir'
+      });
     } catch (error) {
-      console.error('PDF oluşturulurken hata:', error);
-      alert('PDF oluşturulurken bir hata oluştu.');
+      console.error('PDF indirme hatası:', error);
+      Alert.alert('Hata', 'PDF indirme sırasında bir hata oluştu.');
     }
+  };
+
+  const formatDate = (timestamp: firebase.firestore.Timestamp) => {
+    return timestamp.toDate().toLocaleDateString('tr-TR');
   };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-
-
       <ScrollView 
         className="flex-1 px-4 py-6"
         refreshControl={
@@ -624,7 +638,7 @@ const HomeScreen = () => {
                         {cv.personal?.fullName || 'İsimsiz CV'}
                       </Text>
                       <Text className="text-sm text-gray-500">
-                        {new Date(cv.createdAt?.toDate()).toLocaleDateString('tr-TR')}
+                        {formatDate(cv.createdAt)}
                       </Text>
                     </View>
                   </View>
@@ -648,7 +662,7 @@ const HomeScreen = () => {
                   </TouchableOpacity>
 
                   <TouchableOpacity 
-                    onPress={() => {/* İndirme fonksiyonu */}}
+                    onPress={() => handleViewPDF(cv)}
                     className="flex-1 items-center mx-2"
                   >
                     <View className="bg-green-50 p-2 rounded-lg w-full items-center">
@@ -667,17 +681,6 @@ const HomeScreen = () => {
                     </View>
                   </TouchableOpacity>
                 </View>
-
-                {/* PDF Görüntüleme Butonu */}
-                <TouchableOpacity 
-                  onPress={() => handleViewPDF(cv)}
-                  className="mt-3"
-                >
-                  <View className="bg-orange-50 p-2 rounded-lg w-full items-center flex-row justify-center">
-                    <Feather name="file-text" size={18} color="#EA580C" />
-                    <Text className="text-xs text-orange-600 ml-2">PDF Olarak Görüntüle</Text>
-                  </View>
-                </TouchableOpacity>
               </View>
             ))
           ) : (
@@ -689,36 +692,34 @@ const HomeScreen = () => {
       </ScrollView>
 
       {/* PDF Modal */}
-      <RNModal
-        visible={isPdfModalVisible}
-        onRequestClose={() => setIsPdfModalVisible(false)}
-        animationType="slide"
+      <Modal
+        isVisible={showPDF}
+        onBackdropPress={() => setShowPDF(false)}
+        style={{ margin: 0 }}
       >
         <SafeAreaView className="flex-1 bg-white">
           <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-            <Text className="text-lg font-semibold">CV Önizleme</Text>
-            <TouchableOpacity 
-              onPress={() => setIsPdfModalVisible(false)}
-              className="p-2"
-            >
+            <TouchableOpacity onPress={() => setShowPDF(false)}>
               <Feather name="x" size={24} color="#666" />
+            </TouchableOpacity>
+            <Text className="text-lg font-semibold">CV Önizleme</Text>
+            <TouchableOpacity onPress={handleViewPDF}>
+              <Feather name="share-2" size={24} color="#2196F3" />
             </TouchableOpacity>
           </View>
 
           {pdfUri && (
-            <View className="flex-1">
-              <WebView
-                source={{ uri: pdfUri }}
-                style={{ flex: 1 }}
-                onError={(error) => {
-                  console.error('PDF görüntülenirken hata:', error);
-                  alert('PDF görüntülenirken bir hata oluştu.');
-                }}
-              />
-            </View>
+            <WebView
+              source={{ uri: `file://${pdfUri}` }}
+              style={{ flex: 1 }}
+              originWhitelist={['*']}
+              mixedContentMode="always"
+              allowFileAccess={true}
+              allowUniversalAccessFromFileURLs={true}
+            />
           )}
         </SafeAreaView>
-      </RNModal>
+      </Modal>
 
       {/* Existing CV Modal */}
       <CVModal 

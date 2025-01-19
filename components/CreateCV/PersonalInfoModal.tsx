@@ -172,8 +172,8 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({ onClose, onSave, 
                   itemStyle={Platform.OS === 'ios' ? { height: 150 } : {}}
                 >
                   <Picker.Item label="Seçiniz" value="" />
-                  <Picker.Item label="Erkek" value="male" />
-                  <Picker.Item label="Kadın" value="female" />
+                  <Picker.Item label="Erkek" value="Erkek" />
+                  <Picker.Item label="Kadın" value="Kadın" />
                 </Picker>
               </View>
             </View>
@@ -188,9 +188,9 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({ onClose, onSave, 
                   itemStyle={Platform.OS === 'ios' ? { height: 150 } : {}}
                 >
                   <Picker.Item label="Seçiniz" value="" />
-                  <Picker.Item label="Yapıldı" value="completed" />
-                  <Picker.Item label="Muaf" value="exempt" />
-                  <Picker.Item label="Tecilli" value="delayed" />
+                  <Picker.Item label="Yapıldı" value="Yapıldı" />
+                  <Picker.Item label="Muaf" value="Muaf" />
+                  <Picker.Item label="Tecilli" value="Tecilli" />
                 </Picker>
               </View>
             </View>
@@ -205,8 +205,8 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({ onClose, onSave, 
                   itemStyle={Platform.OS === 'ios' ? { height: 150 } : {}}
                 >
                   <Picker.Item label="Seçiniz" value="" />
-                  <Picker.Item label="Bekar" value="single" />
-                  <Picker.Item label="Evli" value="married" />
+                  <Picker.Item label="Bekar" value="Bekar" />
+                  <Picker.Item label="Evli" value="Evli" />
                 </Picker>
               </View>
             </View>

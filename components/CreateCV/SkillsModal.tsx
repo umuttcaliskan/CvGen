@@ -19,14 +19,14 @@ const SkillsModal: React.FC<SkillsModalProps> = ({ onClose, onSave, initialData 
   const [skills, setSkills] = useState<Skill[]>(initialData || [{
     id: '1',
     name: '',
-    level: 'beginner'
+    level: 'Başlangıç'
   }]);
 
   const levels = [
-    { label: 'Başlangıç', value: 'beginner' },
-    { label: 'Orta', value: 'intermediate' },
-    { label: 'İleri', value: 'advanced' },
-    { label: 'Uzman', value: 'expert' }
+    { label: 'Başlangıç', value: 'Başlangıç' },
+    { label: 'Orta', value: 'Orta' },
+    { label: 'İleri', value: 'İleri' },
+    { label: 'Uzman', value: 'Uzman' }
   ];
 
   const handleAddSkill = () => {
@@ -35,7 +35,7 @@ const SkillsModal: React.FC<SkillsModalProps> = ({ onClose, onSave, initialData 
       {
         id: Date.now().toString(),
         name: '',
-        level: 'beginner'
+        level: 'Başlangıç'
       }
     ]);
   };
