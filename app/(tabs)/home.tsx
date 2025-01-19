@@ -237,6 +237,19 @@ const CVModal: React.FC<CVModalProps> = React.memo(({ isVisible, onClose, cv }) 
   );
 });
 
+const formatDate = (timestamp: any) => {
+  if (!timestamp || typeof timestamp.toDate !== 'function') {
+    return 'Tarih yok';
+  }
+  try {
+    const date = timestamp.toDate();
+    return date.toLocaleDateString('tr-TR');
+  } catch (error) {
+    console.error('Tarih formatlanırken hata:', error);
+    return 'Tarih yok';
+  }
+};
+
 interface CVCardProps {
   cv: CVData;
   onPress: () => void;
@@ -580,23 +593,10 @@ const HomeScreen = () => {
     }
   };
 
-  const formatDate = (timestamp: any) => {
-    if (!timestamp || typeof timestamp.toDate !== 'function') {
-      return 'Tarih yok';
-    }
-    try {
-      const date = timestamp.toDate();
-      return date.toLocaleDateString('tr-TR');
-    } catch (error) {
-      console.error('Tarih formatlanırken hata:', error);
-      return 'Tarih yok';
-    }
-  };
-
   const handleEditCV = (cv: CVData) => {
     router.push({
       pathname: "/(tabs)/create",
-      params: { editMode: true, cvData: JSON.stringify(cv) }
+      params: { editMode: "true", cvData: JSON.stringify(cv) }
     });
   };
 
