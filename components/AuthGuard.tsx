@@ -14,10 +14,8 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     const inAuthGroup = segments[0] === '(auth)';
     
     if (!user && !inAuthGroup) {
-      // Kullanıcı giriş yapmamış ve auth grubu dışında bir sayfada
       router.replace('/(auth)/signIn');
     } else if (user && inAuthGroup) {
-      // Kullanıcı giriş yapmış ve auth grubunda
       router.replace('/(tabs)/home');
     }
   }, [user, segments, isLoading]);
