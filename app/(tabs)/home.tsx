@@ -59,9 +59,7 @@ interface CVData {
     phone: string;
     email: string;
   }>;
-  createdAt: {
-    toDate: () => Date;
-  };
+  createdAt: firebase.firestore.Timestamp;
 }
 
 interface CVModalProps {
@@ -296,7 +294,7 @@ const CVCard: React.FC<CVCardProps> = ({ cv, onPress }) => {
       <TouchableOpacity onPress={onPress} style={styles.cardContent}>
         <View style={styles.cardHeader}>
           <Text style={styles.name}>{cv.personal?.fullName || 'İsimsiz'}</Text>
-          <Text style={styles.date}>{cv.createdAt?.toDate().toLocaleDateString()}</Text>
+          <Text style={styles.date}>{formatDate(cv.createdAt)}</Text>
         </View>
         <View style={styles.cardBody}>
           <Text style={styles.position}>{cv.experience?.[0]?.position || 'Pozisyon belirtilmemiş'}</Text>
@@ -472,15 +470,24 @@ const HomeScreen = () => {
         .collection('cvs')
         .where('userId', '==', currentUser.uid)
         .onSnapshot((snapshot) => {
+          // Duplicate kontrolü için Set kullan
+          const uniqueIds = new Set();
           const cvs = snapshot.docs
+            .filter(doc => {
+              if (uniqueIds.has(doc.id)) {
+                return false;
+              }
+              uniqueIds.add(doc.id);
+              return true;
+            })
             .map(doc => ({
               id: doc.id,
               ...doc.data()
             } as CVData))
             .sort((a, b) => {
-              const dateA = a.createdAt?.toDate?.() || new Date(0);
-              const dateB = b.createdAt?.toDate?.() || new Date(0);
-              return dateB.getTime() - dateA.getTime();
+              if (!a.createdAt || !a.createdAt.toDate) return 1;
+              if (!b.createdAt || !b.createdAt.toDate) return -1;
+              return b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime();
             });
           
           setCvList(cvs);
@@ -573,8 +580,24 @@ const HomeScreen = () => {
     }
   };
 
-  const formatDate = (timestamp: firebase.firestore.Timestamp) => {
-    return timestamp.toDate().toLocaleDateString('tr-TR');
+  const formatDate = (timestamp: any) => {
+    if (!timestamp || typeof timestamp.toDate !== 'function') {
+      return 'Tarih yok';
+    }
+    try {
+      const date = timestamp.toDate();
+      return date.toLocaleDateString('tr-TR');
+    } catch (error) {
+      console.error('Tarih formatlanırken hata:', error);
+      return 'Tarih yok';
+    }
+  };
+
+  const handleEditCV = (cv: CVData) => {
+    router.push({
+      pathname: "/(tabs)/create",
+      params: { editMode: true, cvData: JSON.stringify(cv) }
+    });
   };
 
   return (
@@ -617,7 +640,7 @@ const HomeScreen = () => {
           ) : cvList.length > 0 ? (
             cvList.map((cv) => (
               <View 
-                key={cv.id} 
+                key={`cv-${cv.id}`} 
                 className="bg-white rounded-xl shadow-sm mr-4 w-72 p-4"
               >
                 <View className="flex-row items-center justify-between mb-4">
@@ -637,9 +660,7 @@ const HomeScreen = () => {
                       <Text className="text-lg font-semibold text-gray-900">
                         {cv.personal?.fullName || 'İsimsiz CV'}
                       </Text>
-                      <Text className="text-sm text-gray-500">
-                        {formatDate(cv.createdAt)}
-                      </Text>
+                      <Text style={styles.date}>{formatDate(cv.createdAt)}</Text>
                     </View>
                   </View>
                   <TouchableOpacity 
@@ -672,7 +693,7 @@ const HomeScreen = () => {
                   </TouchableOpacity>
 
                   <TouchableOpacity 
-                    onPress={() => {/*indirme fonksiyonu */}}
+                    onPress={() => handleEditCV(cv)}
                     className="flex-1 items-center ml-2"
                   >
                     <View className="bg-purple-50 p-2 rounded-lg w-full items-center">
@@ -696,6 +717,10 @@ const HomeScreen = () => {
         isVisible={showPDF}
         onBackdropPress={() => setShowPDF(false)}
         style={{ margin: 0 }}
+        animationIn="slideInUp"
+        animationOut="slideOutDown"
+        useNativeDriver={true}
+        hideModalContentWhileAnimating={true}
       >
         <SafeAreaView className="flex-1 bg-white">
           <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
@@ -703,7 +728,7 @@ const HomeScreen = () => {
               <Feather name="x" size={24} color="#666" />
             </TouchableOpacity>
             <Text className="text-lg font-semibold">CV Önizleme</Text>
-            <TouchableOpacity onPress={handleViewPDF}>
+            <TouchableOpacity onPress={() => selectedCV && handleViewPDF(selectedCV)}>
               <Feather name="share-2" size={24} color="#2196F3" />
             </TouchableOpacity>
           </View>

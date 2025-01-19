@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Modal, SafeAreaView, Platform, Alert } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import PersonalInfoModal from '../../components/CreateCV/PersonalInfoModal';
 import AboutMeModal from '../../components/CreateCV/AboutMeModal';
@@ -72,6 +72,8 @@ interface CVData {
 }
 
 const CreateScreen = () => {
+  const params = useLocalSearchParams();
+  const router = useRouter();
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [cvSections, setCvSections] = useState<CVSection[]>([
     {
@@ -143,6 +145,28 @@ const CreateScreen = () => {
     references: null
   });
 
+  useEffect(() => {
+    if (params.editMode && params.cvData) {
+      try {
+        const parsedCV = JSON.parse(params.cvData as string);
+        
+        // CV verilerini state'e yükle
+        setCvData(parsedCV);
+        
+        // Tamamlanmış bölümleri işaretle
+        const updatedSections = cvSections.map(section => ({
+          ...section,
+          completed: Boolean(parsedCV[section.id])
+        }));
+        setCvSections(updatedSections);
+        
+      } catch (error) {
+        console.error('CV verisi yüklenirken hata:', error);
+        Alert.alert('Hata', 'CV verisi yüklenirken bir hata oluştu.');
+      }
+    }
+  }, [params.editMode, params.cvData]);
+
   const handleSaveSection = (sectionId: string, data: CVData[keyof CVData]) => {
     setCvData(prev => ({
       ...prev,
@@ -164,16 +188,36 @@ const CreateScreen = () => {
         return;
       }
 
-      const cvRef = await firestore.collection('cvs').add({
+      const newCVData = {
         userId: currentUser.uid,
         ...cvData,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        ...((!params.editMode) ? { createdAt: firebase.firestore.FieldValue.serverTimestamp() } : {})
+      };
 
-      console.log('CV başarıyla oluşturuldu:', cvRef.id);
-      Alert.alert('Başarılı', 'CV\'niz başarıyla oluşturuldu!');
-      
+      if (params.editMode && params.cvData) {
+        try {
+          // Mevcut CV'yi güncelle
+          const parsedCV = JSON.parse(params.cvData as string);
+          await firestore.collection('cvs').doc(parsedCV.id).update(newCVData);
+          Alert.alert('Başarılı', 'CV başarıyla güncellendi!');
+        } catch (error: any) {
+          if (error.code === 'not-found') {
+            // Belge bulunamadıysa yeni CV olarak oluştur
+            newCVData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+            await firestore.collection('cvs').add(newCVData);
+            Alert.alert('Başarılı', 'CV başarıyla oluşturuldu!');
+          } else {
+            throw error;
+          }
+        }
+      } else {
+        // Yeni CV oluştur
+        await firestore.collection('cvs').add(newCVData);
+        Alert.alert('Başarılı', 'CV başarıyla oluşturuldu!');
+      }
+
+      // State'i sıfırla
       setCvData({
         personal: null,
         about: null,
@@ -191,9 +235,12 @@ const CreateScreen = () => {
       }));
       setCvSections(resetSections);
 
+      // Ana sayfaya yönlendir
+      router.push('/(tabs)/home');
+
     } catch (error) {
-      console.error('CV oluşturulurken hata:', error);
-      Alert.alert('Hata', 'CV oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
+      console.error('CV işlemi sırasında hata:', error);
+      Alert.alert('Hata', 'İşlem sırasında bir hata oluştu. Lütfen tekrar deneyin.');
     }
   };
 
@@ -202,6 +249,7 @@ const CreateScreen = () => {
       case 'personal':
         return (
           <PersonalInfoModal 
+            isVisible={true}
             onClose={() => setActiveModal(null)}
             onSave={(data) => handleSaveSection('personal', data)}
             initialData={cvData.personal}

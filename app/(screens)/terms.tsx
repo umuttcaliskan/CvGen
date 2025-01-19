@@ -52,8 +52,8 @@ const TermsScreen: React.FC = () => {
           <Text className="text-xs text-gray-500 text-center">
             Son güncelleme: {new Date().toLocaleDateString()}
           </Text>
-          <Text className="text-xs text-gray-400 text-center mt-2">
-            © 2024 PickSoSo. Tüm hakları saklıdır.
+          <Text className="text-xs text-gray-400 text-center mt-2 mb-1">
+             PickSoSo © 2024. Tüm hakları saklıdır.
           </Text>
         </View>
       </ScrollView>

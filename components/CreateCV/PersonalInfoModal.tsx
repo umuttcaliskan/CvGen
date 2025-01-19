@@ -1,18 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Picker } from '@react-native-picker/picker';
 
 interface PersonalInfoModalProps {
+  isVisible: boolean;
   onClose: () => void;
   onSave: (data: any) => void;
   initialData?: any;
 }
 
-const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({ onClose, onSave, initialData }) => {
+const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({ isVisible, onClose, onSave, initialData }) => {
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
-  const [formData, setFormData] = useState(initialData || {
+  const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     phone: '',
@@ -26,6 +27,24 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({ onClose, onSave, 
     militaryStatus: '',
     maritalStatus: ''
   });
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        fullName: initialData.fullName || '',
+        email: initialData.email || '',
+        phone: initialData.phone || '',
+        birthDate: initialData.birthDate || '',
+        address: initialData.address || '',
+        city: initialData.city || '',
+        district: initialData.district || '',
+        postalCode: initialData.postalCode || '',
+        drivingLicense: initialData.drivingLicense || '',
+        gender: initialData.gender || '',
+        maritalStatus: initialData.maritalStatus || ''
+      });
+    }
+  }, [initialData]);
 
   const handleSave = () => {
     onSave(formData);
@@ -44,7 +63,7 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({ onClose, onSave, 
     <Modal
       animationType="slide"
       transparent={true}
-      visible={true}
+      visible={isVisible}
       onRequestClose={onClose}
     >
       <SafeAreaView className="flex-1 bg-white">

@@ -150,7 +150,7 @@ const Profile = () => {
           </View>
         </View>
 
-        <View className="py-6">
+        <View className="py-4">
           <TouchableOpacity onPress={handleLogout}>
             <View className="flex-row justify-center bg-white p-4 rounded-xl border shadow-sm">
               <Text className="text-lg text-red-600 font-bold">Çıkış Yap</Text>
@@ -160,7 +160,7 @@ const Profile = () => {
 
         <View className="mt-6">
           <Text className="text-xs text-gray-400 text-center">Powered by PickSoSo</Text>
-          <Text className="text-[8px] text-gray-400 text-center mt-1">Version 1.0.0</Text>
+          <Text className="text-[8px] text-gray-400 text-center mt-1 mb-2">Version 1.0.0</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
