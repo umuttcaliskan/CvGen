@@ -29,10 +29,8 @@ export default function TabLayout() {
             bottom: 0,
           },
           android: {
-            marginHorizontal: 16,
-            marginBottom: 16,
-            borderRadius: 16,
-            borderWidth: 1,
+            marginHorizontal: 0,
+            marginBottom: 0,
             borderColor: '#ccc',
             backgroundColor: "white",
             elevation: 4,

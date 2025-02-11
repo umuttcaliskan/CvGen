@@ -3,6 +3,8 @@ import { View, Text, Modal, TextInput, TouchableOpacity, ScrollView, SafeAreaVie
 import { Feather } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Picker } from '@react-native-picker/picker';
+import { firebase } from '../../firebaseConfig';
+import { useAuth } from '../../context/AuthContext';
 
 interface PersonalInfoModalProps {
   isVisible: boolean;
@@ -12,10 +14,11 @@ interface PersonalInfoModalProps {
 }
 
 const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({ isVisible, onClose, onSave, initialData }) => {
+  const { user } = useAuth();
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
-    email: '',
+    email: user?.email || '',
     phone: '',
     birthDate: '',
     address: '',
@@ -41,6 +44,7 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({ isVisible, onClos
         postalCode: initialData.postalCode || '',
         drivingLicense: initialData.drivingLicense || '',
         gender: initialData.gender || '',
+        militaryStatus: initialData.militaryStatus || '',
         maritalStatus: initialData.maritalStatus || ''
       });
     }
@@ -92,13 +96,14 @@ const PersonalInfoModal: React.FC<PersonalInfoModalProps> = ({ isVisible, onClos
             <View>
               <Text className="text-sm font-medium text-gray-700 mb-2 mt-4">E-posta</Text>
               <TextInput
-                className="border border-gray-300 rounded-lg px-4 py-3"
-                value={formData.email}
-                onChangeText={(text) => setFormData({ ...formData, email: text })}
-                placeholder="E-posta"
-                keyboardType="email-address"
-                autoCapitalize="none"
+                className="border border-gray-300 rounded-lg px-4 py-3 bg-gray-100"
+                value={user?.email || ''}
+                editable={false}
+                selectTextOnFocus={false}
               />
+              <Text className="text-xs text-gray-500 mt-1">
+                E-posta adresi değiştirilemez
+              </Text>
             </View>
 
             <View>

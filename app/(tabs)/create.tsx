@@ -15,7 +15,7 @@ import { firebase, firestore } from '../../firebase.config';
 interface CVSection {
   id: string;
   title: string;
-  icon: string;
+  icon: keyof typeof Feather.glyphMap;
   description: string;
   completed: boolean;
 }
@@ -331,7 +331,7 @@ const CreateScreen = () => {
 
       <ScrollView 
         className="flex-1 px-4 py-6"
-        contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? 140 : 120 }}
+        contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? 40 : 38 }}
       >
         {cvSections.map((section) => (
           <TouchableOpacity

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, ActivityIndicator, Alert, RefreshControl, Image, Modal as RNModal, Dimensions, StyleSheet, Platform } from 'react-native';
+import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, ActivityIndicator, Alert, RefreshControl, Image, Modal as RNModal, Dimensions, StyleSheet, Platform, TouchableWithoutFeedback } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import { Feather } from '@expo/vector-icons';
@@ -8,7 +8,6 @@ import Modal from 'react-native-modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import * as FileSystem from 'expo-file-system';
 import { generateCVHtml } from '../utils/generateCVHtml';
 import WebView from 'react-native-webview';
 
@@ -70,6 +69,7 @@ interface CVModalProps {
 
 const CVModal: React.FC<CVModalProps> = React.memo(({ isVisible, onClose, cv }) => {
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const windowHeight = Dimensions.get('window').height;
 
   useEffect(() => {
     const loadProfileImage = async () => {
@@ -89,151 +89,147 @@ const CVModal: React.FC<CVModalProps> = React.memo(({ isVisible, onClose, cv }) 
     loadProfileImage();
   }, []);
 
-  return (
-    <Modal
-      isVisible={isVisible}
-      onBackdropPress={onClose}
-      onSwipeComplete={onClose}
-      swipeDirection={['down']}
-      style={{ margin: 0 }}
-      useNativeDriver={true}
-      hideModalContentWhileAnimating={true}
-    >
-      <View className="bg-white rounded-t-3xl" style={{ height: '90%', marginTop: 'auto' }}>
-        <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <Text className="text-xl font-semibold">CV Detayları</Text>
-          <TouchableOpacity onPress={onClose}>
-            <Feather name="x" size={24} color="#666" />
-          </TouchableOpacity>
-        </View>
+  if (!cv) return null;
 
-        <ScrollView 
-          className="flex-1"
-          showsVerticalScrollIndicator={true}
-          bounces={true}
-          contentContainerStyle={{ padding: 16 }}
-        >
-          {cv && (
-            <View>
-              {/* Profil Resmi */}
-              <View className="items-center mb-6">
-                <View className="w-24 h-24 border border-gray-200 rounded-full overflow-hidden bg-blue-900 justify-center items-center">
-                  {profileImage ? (
-                    <Image 
-                      source={{ uri: profileImage }} 
-                      className="w-full h-full"
-                      resizeMode="cover"
-                    />
-                  ) : (
-                    <Text className="text-4xl text-white font-semibold">
-                      {cv.personal?.fullName?.charAt(0).toUpperCase() || 'U'}
-                    </Text>
-                  )}
+  return (
+    <RNModal
+      visible={isVisible}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>CV Detayları</Text>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Feather name="x" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView 
+            style={styles.modalScroll}
+            showsVerticalScrollIndicator={true}
+            contentContainerStyle={{ paddingBottom: 40 }}
+          >
+            {/* Profil Resmi */}
+            <View style={styles.profileImageContainer}>
+              <View style={styles.profileImage}>
+                {profileImage ? (
+                  <Image 
+                    source={{ uri: profileImage }} 
+                    style={styles.image}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <Text style={styles.profileInitial}>
+                    {cv.personal?.fullName?.charAt(0).toUpperCase() || 'U'}
+                  </Text>
+                )}
+              </View>
+            </View>
+
+            {/* Kişisel Bilgiler */}
+            {cv.personal && (
+              <View className="mb-6">
+                <Text className="text-lg font-semibold text-blue-600 mb-3">Kişisel Bilgiler</Text>
+                <View className="bg-gray-50 rounded-xl p-4">
+                  <Text className="text-gray-800 font-medium mb-1">{cv.personal.fullName}</Text>
+                  <Text className="text-gray-600">{cv.personal.email}</Text>
+                  <Text className="text-gray-600">{cv.personal.phone}</Text>
+                  <Text className="text-gray-600">{cv.personal.address}</Text>
+                  <Text className="text-gray-600">{cv.personal.birthDate}</Text>
                 </View>
               </View>
+            )}
 
-              {/* Kişisel Bilgiler */}
-              {cv.personal && (
-                <View className="mb-6">
-                  <Text className="text-lg font-semibold text-blue-600 mb-3">Kişisel Bilgiler</Text>
-                  <View className="bg-gray-50 rounded-xl p-4">
-                    <Text className="text-gray-800 font-medium mb-1">{cv.personal.fullName}</Text>
-                    <Text className="text-gray-600">{cv.personal.email}</Text>
-                    <Text className="text-gray-600">{cv.personal.phone}</Text>
-                    <Text className="text-gray-600">{cv.personal.address}</Text>
-                    <Text className="text-gray-600">{cv.personal.birthDate}</Text>
-                  </View>
+            {/* Hakkımda */}
+            {cv.about && (
+              <View className="mb-6">
+                <Text className="text-lg font-semibold text-blue-600 mb-3">Hakkımda</Text>
+                <View className="bg-gray-50 rounded-xl p-4">
+                  <Text className="text-gray-600">{cv.about}</Text>
                 </View>
-              )}
+              </View>
+            )}
 
-              {/* Hakkımda */}
-              {cv.about && (
-                <View className="mb-6">
-                  <Text className="text-lg font-semibold text-blue-600 mb-3">Hakkımda</Text>
-                  <View className="bg-gray-50 rounded-xl p-4">
-                    <Text className="text-gray-600">{cv.about}</Text>
+            {/* Eğitim */}
+            {cv.education && cv.education.length > 0 && (
+              <View className="mb-6">
+                <Text className="text-lg font-semibold text-blue-600 mb-3">Eğitim</Text>
+                {cv.education.map((edu) => (
+                  <View key={edu.id} className="bg-gray-50 rounded-xl p-4 mb-2">
+                    <Text className="text-gray-800 font-medium">{edu.schoolName}</Text>
+                    <Text className="text-gray-700">{edu.department}</Text>
+                    <Text className="text-gray-600">{edu.startDate} - {edu.endDate}</Text>
                   </View>
-                </View>
-              )}
+                ))}
+              </View>
+            )}
 
-              {/* Eğitim */}
-              {cv.education && cv.education.length > 0 && (
-                <View className="mb-6">
-                  <Text className="text-lg font-semibold text-blue-600 mb-3">Eğitim</Text>
-                  {cv.education.map((edu) => (
-                    <View key={edu.id} className="bg-gray-50 rounded-xl p-4 mb-2">
-                      <Text className="text-gray-800 font-medium">{edu.schoolName}</Text>
-                      <Text className="text-gray-700">{edu.department}</Text>
-                      <Text className="text-gray-600">{edu.startDate} - {edu.endDate}</Text>
+            {/* Deneyim */}
+            {cv.experience && cv.experience.length > 0 && (
+              <View className="mb-6">
+                <Text className="text-lg font-semibold text-blue-600 mb-3">İş Deneyimi</Text>
+                {cv.experience.map((exp: any) => (
+                  <View key={exp.id} className="bg-gray-50 rounded-xl p-4 mb-2">
+                    <Text className="text-gray-800 font-medium">{exp.companyName}</Text>
+                    <Text className="text-gray-700">{exp.position}</Text>
+                    <Text className="text-gray-500 text-sm">{exp.startDate} - {exp.endDate}</Text>
+                    <Text className="text-gray-600 mt-2">{exp.description}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {/* Beceriler */}
+            {cv.skills && cv.skills.length > 0 && (
+              <View className="mb-6">
+                <Text className="text-lg font-semibold text-blue-600 mb-3">Beceriler</Text>
+                <View className="bg-gray-50 rounded-xl p-4">
+                  {cv.skills.map((skill: any) => (
+                    <View key={skill.id} className="flex-row justify-between items-center mb-2">
+                      <Text className="text-gray-800">{skill.name}</Text>
+                      <Text className="text-gray-600">{skill.level}</Text>
                     </View>
                   ))}
                 </View>
-              )}
+              </View>
+            )}
 
-              {/* Deneyim */}
-              {cv.experience && cv.experience.length > 0 && (
-                <View className="mb-6">
-                  <Text className="text-lg font-semibold text-blue-600 mb-3">İş Deneyimi</Text>
-                  {cv.experience.map((exp: any) => (
-                    <View key={exp.id} className="bg-gray-50 rounded-xl p-4 mb-2">
-                      <Text className="text-gray-800 font-medium">{exp.companyName}</Text>
-                      <Text className="text-gray-700">{exp.position}</Text>
-                      <Text className="text-gray-500 text-sm">{exp.startDate} - {exp.endDate}</Text>
-                      <Text className="text-gray-600 mt-2">{exp.description}</Text>
+            {/* Diller */}
+            {cv.languages && cv.languages.length > 0 && (
+              <View className="mb-6">
+                <Text className="text-lg font-semibold text-blue-600 mb-3">Yabancı Diller</Text>
+                <View className="bg-gray-50 rounded-xl p-4">
+                  {cv.languages.map((lang: any) => (
+                    <View key={lang.id} className="flex-row justify-between items-center mb-2">
+                      <Text className="text-gray-800">{lang.name}</Text>
+                      <Text className="text-gray-600">{lang.level}</Text>
                     </View>
                   ))}
                 </View>
-              )}
+              </View>
+            )}
 
-              {/* Beceriler */}
-              {cv.skills && cv.skills.length > 0 && (
-                <View className="mb-6">
-                  <Text className="text-lg font-semibold text-blue-600 mb-3">Beceriler</Text>
-                  <View className="bg-gray-50 rounded-xl p-4">
-                    {cv.skills.map((skill: any) => (
-                      <View key={skill.id} className="flex-row justify-between items-center mb-2">
-                        <Text className="text-gray-800">{skill.name}</Text>
-                        <Text className="text-gray-600">{skill.level}</Text>
-                      </View>
-                    ))}
+            {/* Referanslar */}
+            {cv.references && cv.references.length > 0 && (
+              <View className="mb-6">
+                <Text className="text-lg font-semibold text-blue-600 mb-3">Referanslar</Text>
+                {cv.references.map((ref: any) => (
+                  <View key={ref.id} className="bg-gray-50 rounded-xl p-4 mb-2">
+                    <Text className="text-gray-800 font-medium">{ref.fullName}</Text>
+                    <Text className="text-gray-700">{ref.position} - {ref.company}</Text>
+                    <Text className="text-gray-600">{ref.phone}</Text>
+                    <Text className="text-gray-600">{ref.email}</Text>
                   </View>
-                </View>
-              )}
-
-              {/* Diller */}
-              {cv.languages && cv.languages.length > 0 && (
-                <View className="mb-6">
-                  <Text className="text-lg font-semibold text-blue-600 mb-3">Yabancı Diller</Text>
-                  <View className="bg-gray-50 rounded-xl p-4">
-                    {cv.languages.map((lang: any) => (
-                      <View key={lang.id} className="flex-row justify-between items-center mb-2">
-                        <Text className="text-gray-800">{lang.name}</Text>
-                        <Text className="text-gray-600">{lang.level}</Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              )}
-
-              {/* Referanslar */}
-              {cv.references && cv.references.length > 0 && (
-                <View className="mb-6">
-                  <Text className="text-lg font-semibold text-blue-600 mb-3">Referanslar</Text>
-                  {cv.references.map((ref: any) => (
-                    <View key={ref.id} className="bg-gray-50 rounded-xl p-4 mb-2">
-                      <Text className="text-gray-800 font-medium">{ref.fullName}</Text>
-                      <Text className="text-gray-700">{ref.position} - {ref.company}</Text>
-                      <Text className="text-gray-600">{ref.phone}</Text>
-                      <Text className="text-gray-600">{ref.email}</Text>
-                    </View>
-                  ))}
-                </View>
-              )}
-            </View>
-          )}
-        </ScrollView>
+                ))}
+              </View>
+            )}
+          </ScrollView>
+        </View>
       </View>
-    </Modal>
+    </RNModal>
   );
 });
 
@@ -440,6 +436,58 @@ const styles = StyleSheet.create({
   shareButton: {
     padding: 8,
   },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '90%',
+    paddingBottom: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  modalScroll: {
+    maxHeight: '85%',
+    paddingHorizontal: 16,
+  },
+  profileImageContainer: {
+    alignItems: 'center',
+    marginVertical: 24,
+  },
+  profileImage: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: '#1e40af',
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  profileInitial: {
+    fontSize: 36,
+    color: 'white',
+    fontWeight: '600',
+  },
 });
 
 const HomeScreen = () => {
@@ -601,7 +649,7 @@ const HomeScreen = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-gray-100">
       <ScrollView 
         className="flex-1 px-4 py-6"
         refreshControl={
@@ -612,7 +660,7 @@ const HomeScreen = () => {
             colors={['#2563EB']}
           />
         }
-        contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? 180 : 160 }}
+        contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? 40 : 38 }}
       >
         {/* Hoş Geldin Mesajı */}
         <View className="bg-white rounded-xl p-6 shadow-sm mb-6">
@@ -713,7 +761,7 @@ const HomeScreen = () => {
         </ScrollView>
 
         {/* Kariyer İpuçları Bölümü */}
-        <View className="bg-white py-6 px-4 mt-4">
+        <View className="bg-white py-6 px-4 mt-4 rounded-xl">
           <Text className="text-lg font-semibold text-gray-900 mb-4 px-2">
             Kariyer İpuçları
           </Text>
@@ -793,7 +841,7 @@ const HomeScreen = () => {
         </SafeAreaView>
       </Modal>
 
-      {/* Existing CV Modal */}
+      {/* Çıkış CV Modal */}
       <CVModal 
         isVisible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
