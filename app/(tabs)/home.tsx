@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, ActivityIndicator, Alert, RefreshControl, Image, Modal as RNModal, Dimensions, StyleSheet, Platform, TouchableWithoutFeedback } from 'react-native';
-import { Stack, router } from 'expo-router';
+import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, ActivityIndicator, Alert, RefreshControl, Image, Modal as RNModal, Dimensions, StyleSheet, Platform } from 'react-native';
+import { router } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import { Feather } from '@expo/vector-icons';
 import { firebase } from '../../firebase.config';
@@ -8,8 +8,11 @@ import Modal from 'react-native-modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import { generateCVHtml } from '../utils/generateCVHtml';
 import WebView from 'react-native-webview';
+import CVTemplateModal from '../../components/CVTemplateModal';
+import { generateCVHtml } from '../../utils/generateCVHtml';
+import { TemplateId } from '../../lib/templates';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 interface CVData {
   id: string;
@@ -76,9 +79,23 @@ const CVModal: React.FC<CVModalProps> = React.memo(({ isVisible, onClose, cv }) 
       try {
         const currentUser = firebase.auth().currentUser;
         if (currentUser?.uid) {
-          const storedImage = await AsyncStorage.getItem(`profileImage_${currentUser.uid}`);
-          if (storedImage) {
-            setProfileImage(storedImage);
+          const storage = getStorage();
+          const storageRef = ref(storage, `profile_images/${currentUser.uid}`);
+          
+          try {
+            const downloadURL = await getDownloadURL(storageRef);
+            setProfileImage(downloadURL);
+            await AsyncStorage.setItem(`profileImage_${currentUser.uid}`, downloadURL);
+          } catch (error: any) {
+            if (error.code === 'storage/object-not-found') {
+              // Profil resmi henüz yüklenmemiş, önbellekte var mı diye kontrol et
+              const cachedImage = await AsyncStorage.getItem(`profileImage_${currentUser.uid}`);
+              if (cachedImage) {
+                setProfileImage(cachedImage);
+              }
+            } else {
+              throw error;
+            }
           }
         }
       } catch (error) {
@@ -255,6 +272,7 @@ const CVCard: React.FC<CVCardProps> = ({ cv, onPress }) => {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [pdfUri, setPdfUri] = useState<string | null>(null);
   const [showPDF, setShowPDF] = useState(false);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
 
   useEffect(() => {
     loadProfileImage();
@@ -262,39 +280,69 @@ const CVCard: React.FC<CVCardProps> = ({ cv, onPress }) => {
 
   const loadProfileImage = async () => {
     try {
-      const storedImage = await AsyncStorage.getItem(`profileImage_${cv.userId}`);
-      if (storedImage) {
-        setProfileImage(storedImage);
+      const storage = getStorage();
+      const storageRef = ref(storage, `profile_images/${cv.userId}`);
+      
+      try {
+        const downloadURL = await getDownloadURL(storageRef);
+        setProfileImage(downloadURL);
+        await AsyncStorage.setItem(`profileImage_${cv.userId}`, downloadURL);
+      } catch (error: any) {
+        if (error.code === 'storage/object-not-found') {
+          // Profil resmi henüz yüklenmemiş, önbellekte var mı diye kontrol et
+          const cachedImage = await AsyncStorage.getItem(`profileImage_${cv.userId}`);
+          if (cachedImage) {
+            setProfileImage(cachedImage);
+          }
+        } else {
+          throw error;
+        }
       }
     } catch (error) {
       console.error('Profil resmi yüklenirken hata:', error);
     }
   };
 
-  const handleViewPDF = async () => {
+  const handleTemplateSelect = async (templateId: TemplateId, cv: CVData) => {
+    setShowTemplateModal(false);
+    
     try {
-      // Profil resmini yükle
-      const storedImage = await AsyncStorage.getItem(`profileImage_${cv.userId}`);
+      // Profil resmini Firebase Storage'dan al
+      const storage = getStorage();
+      const storageRef = ref(storage, `profile_images/${cv.userId}`);
       
-      // HTML oluştur ve profil resmini gönder
-      const html = generateCVHtml(cv, storedImage);
-      const { uri } = await Print.printToFileAsync({ html });
-      setPdfUri(uri);
-      setShowPDF(true);
-    } catch (error) {
-      console.error('PDF oluşturulurken hata:', error);
-      Alert.alert('Hata', 'PDF oluşturulurken bir hata oluştu.');
-    }
-  };
-
-  const handleSharePDF = async () => {
-    try {
-      if (pdfUri) {
-        await Sharing.shareAsync(pdfUri);
+      let profileImageUrl = null;
+      try {
+        profileImageUrl = await getDownloadURL(storageRef);
+      } catch (error: any) {
+        if (error.code === 'storage/object-not-found') {
+          // Profil resmi yoksa önbellekten kontrol et
+          profileImageUrl = await AsyncStorage.getItem(`profileImage_${cv.userId}`);
+        } else {
+          console.error('Profil resmi alınırken hata:', error);
+        }
       }
+
+      // CV HTML'ini oluştur ve profil resmini gönder
+      const html = await generateCVHtml(cv, profileImageUrl, templateId);
+      
+      const { uri } = await Print.printToFileAsync({
+        html,
+        base64: false
+      });
+      
+      if (!(await Sharing.isAvailableAsync())) {
+        Alert.alert('Hata', 'Paylaşım bu cihazda kullanılamıyor');
+        return;
+      }
+      
+      await Sharing.shareAsync(uri, {
+        mimeType: 'application/pdf',
+        dialogTitle: 'CV\'yi İndir'
+      });
     } catch (error) {
-      console.error('PDF paylaşılırken hata:', error);
-      Alert.alert('Hata', 'PDF paylaşılırken bir hata oluştu.');
+      console.error('PDF indirme hatası:', error);
+      Alert.alert('Hata', 'PDF indirme sırasında bir hata oluştu.');
     }
   };
 
@@ -311,43 +359,25 @@ const CVCard: React.FC<CVCardProps> = ({ cv, onPress }) => {
         </View>
       </TouchableOpacity>
       
-      <TouchableOpacity style={styles.pdfButton} onPress={handleViewPDF}>
+      <TouchableOpacity 
+        style={styles.pdfButton} 
+        onPress={() => {
+          if (!cv) {
+            Alert.alert('Hata', 'CV bulunamadı.');
+            return;
+          }
+          setShowTemplateModal(true);
+        }}
+      >
         <Feather name="file-text" size={20} color="#fff" />
         <Text style={styles.pdfButtonText}>PDF olarak görüntüle</Text>
       </TouchableOpacity>
 
-      <Modal 
-        isVisible={showPDF}
-        onBackdropPress={() => setShowPDF(false)}
-        style={styles.modal}
-      >
-        <View style={styles.pdfContainer}>
-          <View style={styles.pdfHeader}>
-            <TouchableOpacity 
-              style={styles.closeButton} 
-              onPress={() => setShowPDF(false)}
-            >
-              <Feather name="x" size={24} color="#000" />
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.shareButton} 
-              onPress={handleSharePDF}
-            >
-              <Feather name="share-2" size={24} color="#2196F3" />
-            </TouchableOpacity>
-          </View>
-          {pdfUri && (
-            <WebView
-              source={{ uri: `file://${pdfUri}` }}
-              style={{ flex: 1 }}
-              originWhitelist={['*']}
-              mixedContentMode="always"
-              allowFileAccess={true}
-              allowUniversalAccessFromFileURLs={true}
-            />
-          )}
-        </View>
-      </Modal>
+      <CVTemplateModal
+        isVisible={showTemplateModal}
+        onClose={() => setShowTemplateModal(false)}
+        onSelectTemplate={(templateId) => handleTemplateSelect(templateId, cv)}
+      />
     </View>
   );
 };
@@ -500,6 +530,7 @@ const HomeScreen = () => {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [pdfUri, setPdfUri] = useState<string | null>(null);
   const [showPDF, setShowPDF] = useState(false);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
 
   useEffect(() => {
     const currentUser = firebase.auth().currentUser;
@@ -510,9 +541,23 @@ const HomeScreen = () => {
 
   const loadProfileImage = async (userId: string) => {
     try {
-      const storedImage = await AsyncStorage.getItem(`profileImage_${userId}`);
-      if (storedImage) {
-        setProfileImage(storedImage);
+      const storage = getStorage();
+      const storageRef = ref(storage, `profile_images/${userId}`);
+      
+      try {
+        const downloadURL = await getDownloadURL(storageRef);
+        setProfileImage(downloadURL);
+        await AsyncStorage.setItem(`profileImage_${userId}`, downloadURL);
+      } catch (error: any) {
+        if (error.code === 'storage/object-not-found') {
+          // Profil resmi henüz yüklenmemiş, önbellekte var mı diye kontrol et
+          const cachedImage = await AsyncStorage.getItem(`profileImage_${userId}`);
+          if (cachedImage) {
+            setProfileImage(cachedImage);
+          }
+        } else {
+          throw error;
+        }
       }
     } catch (error) {
       console.error('Profil resmi yüklenirken hata:', error);
@@ -613,19 +658,72 @@ const HomeScreen = () => {
 
   const handleViewPDF = async (cv: CVData) => {
     try {
-      // Profil resmini yükle
-      const storedImage = await AsyncStorage.getItem(`profileImage_${cv.userId}`);
+      // Profil resmini Firebase Storage'dan al
+      const storage = getStorage();
+      const storageRef = ref(storage, `profile_images/${cv.userId}`);
       
-      // HTML oluştur ve profil resmini gönder
-      const html = generateCVHtml(cv, storedImage);
+      let profileImageUrl = null;
+      try {
+        profileImageUrl = await getDownloadURL(storageRef);
+      } catch (error: any) {
+        if (error.code === 'storage/object-not-found') {
+          // Profil resmi yoksa önbellekten kontrol et
+          profileImageUrl = await AsyncStorage.getItem(`profileImage_${cv.userId}`);
+        } else {
+          console.error('Profil resmi alınırken hata:', error);
+        }
+      }
+
+      const html = await generateCVHtml(cv, profileImageUrl, 'template1');
       
-      // PDF oluştur
       const { uri } = await Print.printToFileAsync({
         html,
         base64: false
       });
       
-      // PDF'i paylaş
+      setPdfUri(uri);
+      setShowPDF(true);
+    } catch (error) {
+      console.error('PDF görüntüleme hatası:', error);
+      Alert.alert('Hata', 'PDF görüntüleme sırasında bir hata oluştu.');
+    }
+  };
+
+  const handleEditCV = (cv: CVData) => {
+    router.push({
+      pathname: "/(tabs)/create",
+      params: { editMode: "true", cvData: JSON.stringify(cv) }
+    });
+  };
+
+  const handleTemplateSelect = async (templateId: TemplateId, cv: CVData) => {
+    setShowTemplateModal(false);
+    
+    try {
+      // Profil resmini Firebase Storage'dan al
+      const storage = getStorage();
+      const storageRef = ref(storage, `profile_images/${cv.userId}`);
+      
+      let profileImageUrl = null;
+      try {
+        profileImageUrl = await getDownloadURL(storageRef);
+      } catch (error: any) {
+        if (error.code === 'storage/object-not-found') {
+          // Profil resmi yoksa önbellekten kontrol et
+          profileImageUrl = await AsyncStorage.getItem(`profileImage_${cv.userId}`);
+        } else {
+          console.error('Profil resmi alınırken hata:', error);
+        }
+      }
+
+      // CV HTML'ini oluştur ve profil resmini gönder
+      const html = await generateCVHtml(cv, profileImageUrl, templateId);
+      
+      const { uri } = await Print.printToFileAsync({
+        html,
+        base64: false
+      });
+      
       if (!(await Sharing.isAvailableAsync())) {
         Alert.alert('Hata', 'Paylaşım bu cihazda kullanılamıyor');
         return;
@@ -639,13 +737,6 @@ const HomeScreen = () => {
       console.error('PDF indirme hatası:', error);
       Alert.alert('Hata', 'PDF indirme sırasında bir hata oluştu.');
     }
-  };
-
-  const handleEditCV = (cv: CVData) => {
-    router.push({
-      pathname: "/(tabs)/create",
-      params: { editMode: "true", cvData: JSON.stringify(cv) }
-    });
   };
 
   return (
@@ -732,7 +823,10 @@ const HomeScreen = () => {
                   </TouchableOpacity>
 
                   <TouchableOpacity 
-                    onPress={() => handleViewPDF(cv)}
+                    onPress={() => {
+                      setSelectedCV(cv);
+                      setShowTemplateModal(true);
+                    }}
                     className="flex-1 items-center mx-2"
                   >
                     <View className="bg-green-50 p-2 rounded-lg w-full items-center">
@@ -846,6 +940,18 @@ const HomeScreen = () => {
         isVisible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
         cv={selectedCV}
+      />
+
+      <CVTemplateModal
+        isVisible={showTemplateModal}
+        onClose={() => setShowTemplateModal(false)}
+        onSelectTemplate={(templateId) => {
+          if (selectedCV) {
+            handleTemplateSelect(templateId, selectedCV);
+          } else {
+            Alert.alert('Hata', 'CV bulunamadı.');
+          }
+        }}
       />
     </SafeAreaView>
   );

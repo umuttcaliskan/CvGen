@@ -11,6 +11,7 @@ import ProfileButton from '../../components/ProfileComponents/ProfileButton';
 import ProfileSwitch from '../../components/ProfileComponents/ProfileSwitch';
 import Preference from '../../components/ProfileComponents/Preference';
 import { useAuth } from '../../context/AuthContext';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const Profile = () => {
   const { user, userData } = useAuth();
@@ -26,9 +27,26 @@ const Profile = () => {
   const loadProfileImage = async () => {
     try {
       if (!user?.uid) return;
-      const storedImage = await AsyncStorage.getItem(`profileImage_${user.uid}`);
-      if (storedImage) {
-        setProfileImage(storedImage);
+      
+      // Firebase Storage'dan profil resmini al
+      const storage = getStorage();
+      const storageRef = ref(storage, `profile_images/${user.uid}`);
+      
+      try {
+        const downloadURL = await getDownloadURL(storageRef);
+        setProfileImage(downloadURL);
+        // Performans için URL'i önbelleğe al
+        await AsyncStorage.setItem(`profileImage_${user.uid}`, downloadURL);
+      } catch (error: any) {
+        if (error.code === 'storage/object-not-found') {
+          // Profil resmi henüz yüklenmemiş, önbellekte var mı diye kontrol et
+          const cachedImage = await AsyncStorage.getItem(`profileImage_${user.uid}`);
+          if (cachedImage) {
+            setProfileImage(cachedImage);
+          }
+          return;
+        }
+        throw error;
       }
     } catch (error) {
       console.error('Profil resmi yüklenirken hata:', error);
@@ -58,12 +76,28 @@ const Profile = () => {
 
       if (!result.canceled) {
         const imageUri = result.assets[0].uri;
-        setProfileImage(imageUri);
-        await AsyncStorage.setItem(`profileImage_${user.uid}`, imageUri);
+        
+        // Uri'den blob oluştur
+        const response = await fetch(imageUri);
+        const blob = await response.blob();
+
+        // Storage referansını oluştur
+        const storage = getStorage();
+        const storageRef = ref(storage, `profile_images/${user.uid}`);
+
+        // Resmi yükle
+        await uploadBytes(storageRef, blob);
+
+        // Download URL'ini al
+        const downloadURL = await getDownloadURL(storageRef);
+
+        // State ve AsyncStorage'ı güncelle
+        setProfileImage(downloadURL);
+        await AsyncStorage.setItem(`profileImage_${user.uid}`, downloadURL);
       }
     } catch (error) {
-      console.error('Resim seçilirken hata:', error);
-      alert('Resim seçilirken bir hata oluştu.');
+      console.error('Resim yüklenirken hata:', error);
+      alert('Resim yüklenirken bir hata oluştu.');
     }
   };
 
@@ -72,6 +106,7 @@ const Profile = () => {
       const auth = getAuth();
       await signOut(auth);
       setProfileImage(null);
+      await AsyncStorage.removeItem(`profileImage_${user?.uid}`);
       router.replace("/(auth)/signIn");
     } catch (error) {
       console.error("Çıkış yaparken hata:", error);
