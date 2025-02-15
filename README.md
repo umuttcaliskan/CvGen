@@ -1,50 +1,98 @@
-# Welcome to your Expo app 👋
+# PickSoSo CV Maker 📝
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+PickSoSo CV Maker, profesyonel özgeçmişler oluşturmanıza yardımcı olan modern bir mobil uygulamadır. Expo ve React Native teknolojileri kullanılarak geliştirilmiştir.
 
-## Get started
+## 🚀 Özellikler
 
-1. Install dependencies
+- 📱 Kullanıcı dostu arayüz
+- 🎨 Profesyonel CV şablonları
+- 💾 Otomatik kaydetme
+- 📤 PDF olarak dışa aktarma
+- 🔄 Gerçek zamanlı önizleme
+- 🌐 Çevrimdışı çalışma desteği
+- 🔒 Güvenli veri saklama
 
+## 🛠 Kurulum
+
+1. Depoyu klonlayın:
+   ```bash
+   git clone https://github.com/yourusername/picksoso-cv-maker.git
+   ```
+
+2. Bağımlılıkları yükleyin:
    ```bash
    npm install
    ```
 
-2. Start the app
-
+3. Uygulamayı başlatın:
    ```bash
-    npx expo start
+   npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+## 📱 Uygulama Çalıştırma Seçenekleri
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Uygulamayı aşağıdaki platformlarda test edebilirsiniz:
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- 📲 iOS Simulator
+- 🤖 Android Emulator
+- 📱 Expo Go uygulaması (iOS/Android)
+- 🌐 Web tarayıcı
 
-## Get a fresh project
+## 🔧 Geliştirme
 
-When you're ready, run:
+Bu proje aşağıdaki teknolojileri kullanmaktadır:
 
-```bash
-npm run reset-project
+- ⚛️ React Native
+- 📱 Expo
+- 🔥 Firebase
+- 🎨 TailwindCSS (NativeWind)
+- 📍 Expo Router
+
+## �� Proje Yapısı
+
+```
+picksoso-cv-maker/
+├── app/                    # Ana uygulama dosyaları
+│   ├── (auth)/            # Kimlik doğrulama ekranları
+│   ├── (screens)/         # Uygulama ekranları
+│   └── (tabs)/            # Tab navigasyon ekranları
+├── components/            # Yeniden kullanılabilir bileşenler
+├── context/              # Context API dosyaları
+├── lib/                  # Yardımcı fonksiyonlar ve şablonlar
+└── utils/                # Yardımcı araçlar
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 🔐 Firebase Yapılandırması
 
-## Learn more
+1. Firebase Console'dan yeni bir proje oluşturun
+2. Kimlik doğrulama ve Firestore'u etkinleştirin
+3. Firebase yapılandırma bilgilerinizi `firebaseConfig.ts` dosyasına ekleyin
 
-To learn more about developing your project with Expo, look at the following resources:
+## 🤝 Katkıda Bulunma
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+1. Bu depoyu fork edin
+2. Yeni bir özellik dalı oluşturun (`git checkout -b feature/amazing-feature`)
+3. Değişikliklerinizi commit edin (`git commit -m 'feat: Add amazing feature'`)
+4. Dalınıza push yapın (`git push origin feature/amazing-feature`)
+5. Bir Pull Request oluşturun
 
-## Join the community
+## 📄 Lisans
 
-Join our community of developers creating universal apps.
+Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## 📞 İletişim
+
+PickSoSo - [@picksoso](https://instagram.com/picksoso_)
+
+E-posta: destek@picksoso.com
+Web: www.picksoso.com
+
+## 🙏 Teşekkürler
+
+- [Expo](https://expo.dev)
+- [React Native](https://reactnative.dev)
+- [Firebase](https://firebase.google.com)
+- [NativeWind](https://www.nativewind.dev)
+
+---
+Developed with ❤️ by PickSoSo Team
