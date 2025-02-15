@@ -4,6 +4,7 @@ import { Platform, Image, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import logo_home from '../../assets/images/logo/logo_home.png';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -43,7 +44,7 @@ export default function TabLayout() {
           headerTitle: '',
           headerLeft: () => (
             <Image
-              source={require('../../assets/images/splash-icon.png')} 
+              source={logo_home} 
               style={{ width: 150, height: 30, marginLeft: 10 }}
             />
           ),
@@ -68,7 +69,7 @@ export default function TabLayout() {
           headerTitle: '',
           headerLeft: () => (
             <Image
-              source={require('../../assets/images/splash-icon.png')}
+              source={logo_home}
               style={{ width: 150, height: 30, marginLeft: 10 }}
             />
           ),
@@ -88,7 +89,7 @@ export default function TabLayout() {
           headerTitle: '',
           headerLeft: () => (
             <Image
-              source={require('../../assets/images/splash-icon.png')}
+              source={logo_home}
               style={{ width: 150, height: 30, marginLeft: 10 }}
             />
           ),

@@ -27,7 +27,7 @@ const SplashScreen = () => {
       <View className="flex-1 justify-center items-center">
       
         <Image
-          source={require('../assets/images/blackLogo.png')}
+          source={require('../assets/images/logo/splash_logo.png')}
           className="w-[400px] h-[120px]"
           resizeMode="contain"
         />

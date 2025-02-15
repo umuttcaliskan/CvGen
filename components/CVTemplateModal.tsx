@@ -21,7 +21,10 @@ const CVTemplateModal: React.FC<CVTemplateModalProps> = ({ isVisible, onClose, o
   const templates = [
     { id: 'modern', name: 'Modern', image: require('../assets/images/cv.png'), icon: require('../assets/images/icon.png') },
     { id: 'professional', name: 'Profesyonel', image: require('../assets/images/cv1.png'), icon: require('../assets/images/icon.png') },
-    // Remove or update other templates to match available template IDs
+    { id: 'elegant', name: 'Elegant', image: require('../assets/images/cv2.png'), icon: require('../assets/images/icon.png') },
+    { id: 'feminine', name: 'Feminine', image: require('../assets/images/cv3.png'), icon: require('../assets/images/icon.png') },
+    { id: 'darkModern', name: 'Dark Modern', image: require('../assets/images/cv4.png'), icon: require('../assets/images/icon.png') },
+    { id: 'minimalist', name: 'Minimalist', image: require('../assets/images/cv5.png'), icon: require('../assets/images/icon.png') },
   ];
 
   const [selectedId, setSelectedId] = useState<TemplateId>('modern');

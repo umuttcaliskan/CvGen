@@ -1,4 +1,10 @@
-import { getTemplate, TemplateId } from '../lib/templates';
+import { TemplateId } from '../lib/templates';
+import { modernTemplate } from '../lib/templates/modern';
+import { professionalTemplate } from '../lib/templates/professional';
+import { elegantTemplate } from '../lib/templates/elegant';
+import { feminineTemplate } from '../lib/templates/feminine';
+import { minimalistTemplate } from '../lib/templates/minimalist';
+import { darkModernTemplate } from '../lib/templates/darkModern';
 
 interface CVData {
     id: string;
@@ -76,4 +82,23 @@ export const generateCVHtml = async (cv: CVData, profileImageUrl: string | null,
   const html = template.generateHTML(cv, base64Image as string | null);
 
   return html;
+};
+
+const getTemplate = (templateId: TemplateId) => {
+  switch (templateId) {
+    case 'modern':
+      return modernTemplate;
+    case 'professional':
+      return professionalTemplate;
+    case 'elegant':
+      return elegantTemplate;
+    case 'feminine':
+      return feminineTemplate;
+    case 'minimalist':
+      return minimalistTemplate;
+    case 'darkModern':
+      return darkModernTemplate;
+    default:
+      return modernTemplate;
+  }
 }; 

@@ -13,6 +13,7 @@ import CVTemplateModal from '../../components/CVTemplateModal';
 import { generateCVHtml } from '../../utils/generateCVHtml';
 import { TemplateId } from '../../lib/templates';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import CareerTipsModal from '../../components/CareerTipsModal';
 
 interface CVData {
   id: string;
@@ -531,6 +532,9 @@ const HomeScreen = () => {
   const [pdfUri, setPdfUri] = useState<string | null>(null);
   const [showPDF, setShowPDF] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [showTipsModal, setShowTipsModal] = useState(false);
+  const [activeTipType, setActiveTipType] = useState<'cv' | 'interview' | 'career' | null>(null);
+  const [activeTipTitle, setActiveTipTitle] = useState('');
 
   useEffect(() => {
     const currentUser = firebase.auth().currentUser;
@@ -861,7 +865,14 @@ const HomeScreen = () => {
           </Text>
           
           <View className="space-y-4">
-            <TouchableOpacity className="bg-blue-50 rounded-xl p-4 mt-2">
+            <TouchableOpacity 
+              className="bg-blue-50 rounded-xl p-4 mt-2"
+              onPress={() => {
+                setActiveTipType('cv');
+                setActiveTipTitle('Etkili CV Hazırlama');
+                setShowTipsModal(true);
+              }}
+            >
               <View className="bg-blue-100 rounded-lg p-3 w-12 h-12 items-center justify-center mb-3">
                 <Feather name="file-text" size={24} color="#2563EB" />
               </View>
@@ -873,7 +884,14 @@ const HomeScreen = () => {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity className="bg-purple-50 rounded-xl p-4 mt-4">
+            <TouchableOpacity 
+              className="bg-purple-50 rounded-xl p-4 mt-4"
+              onPress={() => {
+                setActiveTipType('interview');
+                setActiveTipTitle('Mülakat Teknikleri');
+                setShowTipsModal(true);
+              }}
+            >
               <View className="bg-purple-100 rounded-lg p-3 w-12 h-12 items-center justify-center mb-3">
                 <Feather name="users" size={24} color="#7C3AED" />
               </View>
@@ -885,7 +903,14 @@ const HomeScreen = () => {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity className="bg-green-50 rounded-xl p-4 mt-4">
+            <TouchableOpacity 
+              className="bg-green-50 rounded-xl p-4 mt-4"
+              onPress={() => {
+                setActiveTipType('career');
+                setActiveTipTitle('Kariyer Gelişimi');
+                setShowTipsModal(true);
+              }}
+            >
               <View className="bg-green-100 rounded-lg p-3 w-12 h-12 items-center justify-center mb-3">
                 <Feather name="trending-up" size={24} color="#059669" />
               </View>
@@ -952,6 +977,13 @@ const HomeScreen = () => {
             Alert.alert('Hata', 'CV bulunamadı.');
           }
         }}
+      />
+
+      <CareerTipsModal
+        isVisible={showTipsModal}
+        onClose={() => setShowTipsModal(false)}
+        title={activeTipTitle}
+        type={activeTipType || 'cv'}
       />
     </SafeAreaView>
   );
