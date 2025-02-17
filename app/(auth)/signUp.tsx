@@ -36,6 +36,7 @@ const SignUpScreen: React.FC = () => {
         fullName,
         birthDate,
         email,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       });
 
       Alert.alert('Başarılı', `Hesabınız başarıyla oluşturuldu, Hoşgeldiniz, ${email}!`);
