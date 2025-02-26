@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Modal, SafeAreaView, Platform, Alert } from 'react-native';
+import React, { useState, useEffect, useMemo } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, Platform, Alert, ActivityIndicator } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
+import * as Progress from 'react-native-progress';
 import PersonalInfoModal from '../../components/CreateCV/PersonalInfoModal';
 import AboutMeModal from '../../components/CreateCV/AboutMeModal';
 import EducationModal from '../../components/CreateCV/EducationModal';
@@ -10,6 +11,8 @@ import ExperienceModal from '../../components/CreateCV/ExperienceModal';
 import SkillsModal from '../../components/CreateCV/SkillsModal';
 import LanguagesModal from '../../components/CreateCV/LanguagesModal';
 import ReferencesModal from '../../components/CreateCV/ReferencesModal';
+import SocialMediaModal from '../../components/CreateCV/SocialMediaModal';
+import ProjectsModal from '../../components/CreateCV/ProjectsModal';
 import { firebase, firestore } from '../../firebase.config';
 
 interface CVSection {
@@ -69,7 +72,35 @@ interface CVData {
     phone: string;
     email: string;
   }> | null;
+  socialMedia: Array<{
+    id: string;
+    platform: string;
+    username: string;
+    url: string;
+  }> | null;
+  projects: Array<{
+    id: string;
+    name: string;
+    description: string;
+    technologies: string;
+    startDate: string;
+    endDate: string;
+    projectUrl: string;
+  }> | null;
 }
+
+const initialCVData = {
+  personal: null,
+  about: null,
+  education: null,
+  certificates: null,
+  experience: null,
+  skills: null,
+  languages: null,
+  references: null,
+  socialMedia: null,
+  projects: null
+};
 
 const CreateScreen = () => {
   const params = useLocalSearchParams();
@@ -119,6 +150,13 @@ const CreateScreen = () => {
       completed: false
     },
     {
+      id: 'projects',
+      title: 'Projelerim',
+      icon: 'code',
+      description: 'Kişisel ve profesyonel projeleriniz',
+      completed: false
+    },
+    {
       id: 'languages',
       title: 'Diller',
       icon: 'globe',
@@ -131,6 +169,13 @@ const CreateScreen = () => {
       icon: 'users',
       description: 'Referans olarak gösterebileceğiniz kişiler',
       completed: false
+    },
+    {
+      id: 'socialMedia',
+      title: 'Sosyal Medya Hesaplarım',
+      icon: 'link',
+      description: 'LinkedIn, GitHub, Twitter ve diğer sosyal medya hesaplarınız',
+      completed: false
     }
   ]);
 
@@ -142,18 +187,30 @@ const CreateScreen = () => {
     experience: null,
     skills: null,
     languages: null,
-    references: null
+    references: null,
+    socialMedia: null,
+    projects: null
   });
 
+  const [loading, setLoading] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+
+  const completionPercentage = useMemo(() => {
+    const completedSections = cvSections.filter(section => section.completed).length;
+    return completedSections / cvSections.length;
+  }, [cvSections]);
+
   useEffect(() => {
-    if (params.editMode && params.cvData) {
+    console.log("Edit Mode:", params.editMode);
+    console.log("CV Data:", params.cvData);
+    
+    if (params.editMode === "true" && params.cvData) {
       try {
         const parsedCV = JSON.parse(params.cvData as string);
         
-        // CV verilerini state'e yükle
         setCvData(parsedCV);
+        setIsEditMode(true);
         
-        // Tamamlanmış bölümleri işaretle
         const updatedSections = cvSections.map(section => ({
           ...section,
           completed: Boolean(parsedCV[section.id])
@@ -163,7 +220,11 @@ const CreateScreen = () => {
       } catch (error) {
         console.error('CV verisi yüklenirken hata:', error);
         Alert.alert('Hata', 'CV verisi yüklenirken bir hata oluştu.');
+        resetFormCompletely();
       }
+    } else {
+      resetFormCompletely();
+      setIsEditMode(false);
     }
   }, [params.editMode, params.cvData]);
 
@@ -179,69 +240,95 @@ const CreateScreen = () => {
     setCvSections(updatedSections);
   };
 
+  const navigateToHomeAndClearParams = () => {
+    resetFormCompletely();
+    setIsEditMode(false);
+    
+    router.replace({
+      pathname: '/(tabs)/home'
+    });
+    
+    setTimeout(() => {
+      router.setParams({});
+    }, 100);
+  };
+
   const handleCreateCV = async () => {
     try {
+      setLoading(true);
       const currentUser = firebase.auth().currentUser;
       
       if (!currentUser) {
         Alert.alert('Hata', 'Lütfen önce giriş yapın.');
+        setLoading(false);
         return;
       }
 
-      const newCVData = {
-        userId: currentUser.uid,
-        ...cvData,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        ...((!params.editMode) ? { createdAt: firebase.firestore.FieldValue.serverTimestamp() } : {})
-      };
-
-      if (params.editMode && params.cvData) {
+      if (isEditMode && params.cvData) {
         try {
-          // Mevcut CV'yi güncelle
           const parsedCV = JSON.parse(params.cvData as string);
+          
+          const cvSnapshot = await firestore.collection('cvs').doc(parsedCV.id).get();
+          const existingCVData = cvSnapshot.data();
+
+          const newCVData = {
+            userId: currentUser.uid,
+            ...cvData,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            createdAt: existingCVData?.createdAt || firebase.firestore.FieldValue.serverTimestamp()
+          };
+          
           await firestore.collection('cvs').doc(parsedCV.id).update(newCVData);
-          Alert.alert('Başarılı', 'CV başarıyla güncellendi!');
+          
+          setIsEditMode(false);
+          navigateToHomeAndClearParams();
+          
+          setTimeout(() => {
+            Alert.alert('Başarılı', 'CV başarıyla güncellendi!');
+          }, 500);
+          
         } catch (error: any) {
-          if (error.code === 'not-found') {
-            // Belge bulunamadıysa yeni CV olarak oluştur
-            newCVData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-            await firestore.collection('cvs').add(newCVData);
-            Alert.alert('Başarılı', 'CV başarıyla oluşturuldu!');
-          } else {
-            throw error;
-          }
+          setLoading(false);
+          console.error('CV güncelleme hatası:', error);
+          throw error;
         }
       } else {
-        // Yeni CV oluştur
+        const newCVData = {
+          userId: currentUser.uid,
+          ...cvData,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
         await firestore.collection('cvs').add(newCVData);
-        Alert.alert('Başarılı', 'CV başarıyla oluşturuldu!');
+        
+        setIsEditMode(false);
+        navigateToHomeAndClearParams();
+        
+        setTimeout(() => {
+          Alert.alert('Başarılı', 'CV başarıyla oluşturuldu!');
+        }, 500);
       }
-
-      // State'i sıfırla
-      setCvData({
-        personal: null,
-        about: null,
-        education: null,
-        certificates: null,
-        experience: null,
-        skills: null,
-        languages: null,
-        references: null
-      });
-
-      const resetSections = cvSections.map(section => ({
-        ...section,
-        completed: false
-      }));
-      setCvSections(resetSections);
-
-      // Ana sayfaya yönlendir
-      router.push('/(tabs)/home');
 
     } catch (error) {
       console.error('CV işlemi sırasında hata:', error);
       Alert.alert('Hata', 'İşlem sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const resetFormCompletely = () => {
+    setCvData({...initialCVData});
+    
+    const resetSections = cvSections.map(section => ({
+      ...section,
+      completed: false
+    }));
+    setCvSections(resetSections);
+    
+    setActiveModal(null);
+    setIsEditMode(false);
   };
 
   const renderModal = () => {
@@ -295,6 +382,14 @@ const CreateScreen = () => {
             initialData={cvData.skills}
           />
         );
+      case 'projects':
+        return (
+          <ProjectsModal
+            onClose={() => setActiveModal(null)}
+            onSave={(data) => handleSaveSection('projects', data)}
+            initialData={cvData.projects}
+          />
+        );
       case 'languages':
         return (
           <LanguagesModal 
@@ -309,6 +404,14 @@ const CreateScreen = () => {
             onClose={() => setActiveModal(null)}
             onSave={(data) => handleSaveSection('references', data)}
             initialData={cvData.references}
+          />
+        );
+      case 'socialMedia':
+        return (
+          <SocialMediaModal
+            onClose={() => setActiveModal(null)}
+            onSave={(data) => handleSaveSection('socialMedia', data)}
+            initialData={cvData.socialMedia}
           />
         );
       default:
@@ -331,49 +434,312 @@ const CreateScreen = () => {
 
       <ScrollView 
         className="flex-1 px-4 py-6"
-        contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? 40 : 38 }}
+        contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? 80 : 60 }}
+        showsVerticalScrollIndicator={false}
       >
-        {cvSections.map((section) => (
-          <TouchableOpacity
-            key={section.id}
-            onPress={() => setActiveModal(section.id)}
-            className="bg-white rounded-xl p-4 mb-4 shadow-sm flex-row items-center"
-          >
-            <View className="bg-blue-50 p-3 rounded-lg">
-              <Feather name={section.icon} size={24} color="#2563EB" />
-            </View>
-            <View className="flex-1 ml-4">
-              <Text className="text-lg font-semibold text-gray-900">
-                {section.title}
-              </Text>
-              <Text className="text-sm text-gray-500">
-                {section.description}
-              </Text>
-            </View>
-            <View className="flex-row items-center">
-              {section.completed && (
-                <View className="mr-2">
-                  <Feather name="check-circle" size={20} color="#10B981" />
-                </View>
-              )}
-              <Feather name="chevron-right" size={20} color="#9CA3AF" />
-            </View>
-          </TouchableOpacity>
-        ))}
-
-        <TouchableOpacity
-          className="bg-blue-600 rounded-xl py-4 px-6 mt-4 shadow-sm"
-          onPress={handleCreateCV}
-        >
-          <View className="flex-row items-center justify-center">
-            <Feather name="file-plus" size={24} color="#fff" className="mr-2" />
-            <Text className="text-white font-semibold text-lg ml-2">
-              CV Oluştur
+        <View className="bg-white rounded-xl p-5 mb-6 shadow-sm">
+          <Text className="text-xl font-bold text-gray-800 mb-2">
+            {isEditMode ? "CV'nizi Düzenleyin" : "Profesyonel Bir CV Oluşturun"}
+          </Text>
+          <Text className="text-gray-500 mb-4">
+            İş başvurularınızda sizi öne çıkaracak etkileyici bir CV hazırlamak için aşağıdaki bölümleri doldurun.
+          </Text>
+          
+          <View className="mb-1 flex-row justify-between">
+            <Text className="text-sm text-gray-500">Tamamlanma Oranı</Text>
+            <Text className="text-sm font-medium text-blue-500">
+              %{Math.round(completionPercentage * 100)}
             </Text>
           </View>
-        </TouchableOpacity>
+          <Progress.Bar
+            progress={completionPercentage}
+            width={null}
+            height={8}
+            color="#2563EB"
+            unfilledColor="#E5E7EB"
+            borderWidth={0}
+            borderRadius={4}
+          />
+        </View>
+        
+        <View className="mb-6">
+          <Text className="text-lg font-semibold text-gray-800 mb-4 px-1">
+            Temel Bilgiler
+          </Text>
+          
+          <View className="flex-row mb-4 gap-3">
+            <TouchableOpacity
+              onPress={() => setActiveModal('personal')}
+              className={`flex-1 p-4 rounded-xl shadow-sm ${cvData.personal ? 'bg-blue-50 border border-blue-100' : 'bg-white'}`}
+              style={{ elevation: 1 }}
+            >
+              <View className="items-center">
+                <View className={`p-3 rounded-full mb-2 ${cvData.personal ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                  <Feather name="user" size={24} color={cvData.personal ? "#2563EB" : "#6B7280"} />
+                </View>
+                <Text className={`text-base font-medium mb-1 ${cvData.personal ? 'text-blue-700' : 'text-gray-800'}`}>
+                  Kişisel Bilgiler
+                </Text>
+                <View className="items-center justify-center">
+                  {cvData.personal ? (
+                    <Feather name="check-circle" size={16} color="#10B981" />
+                  ) : (
+                    <Text className="text-xs text-gray-400 text-center">Zorunlu</Text>
+                  )}
+                </View>
+              </View>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              onPress={() => setActiveModal('about')}
+              className={`flex-1 p-4 rounded-xl shadow-sm ${cvData.about ? 'bg-blue-50 border border-blue-100' : 'bg-white'}`}
+              style={{ elevation: 1 }}
+            >
+              <View className="items-center">
+                <View className={`p-3 rounded-full mb-2 ${cvData.about ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                  <Feather name="file-text" size={24} color={cvData.about ? "#2563EB" : "#6B7280"} />
+                </View>
+                <Text className={`text-base font-medium mb-1 ${cvData.about ? 'text-blue-700' : 'text-gray-800'}`}>
+                  Hakkımda
+                </Text>
+                <View className="items-center justify-center">
+                  {cvData.about ? (
+                    <Feather name="check-circle" size={16} color="#10B981" />
+                  ) : (
+                    <Text className="text-xs text-gray-400 text-center">Önerilen</Text>
+                  )}
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+          
+          <Text className="text-lg font-semibold text-gray-800 mb-4 mt-8 px-1">
+            Kariyer Detayları
+          </Text>
+          
+          <View className="flex-row mb-4 gap-3">
+            <TouchableOpacity
+              onPress={() => setActiveModal('education')}
+              className={`flex-1 p-4 rounded-xl shadow-sm ${cvData.education ? 'bg-blue-50 border border-blue-100' : 'bg-white'}`}
+              style={{ elevation: 1 }}
+            >
+              <View className="items-center">
+                <View className={`p-3 rounded-full mb-2 ${cvData.education ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                  <Feather name="book" size={24} color={cvData.education ? "#2563EB" : "#6B7280"} />
+                </View>
+                <Text className={`text-base font-medium mb-1 ${cvData.education ? 'text-blue-700' : 'text-gray-800'}`}>
+                  Eğitim
+                </Text>
+                <View className="items-center justify-center">
+                  {cvData.education ? (
+                    <Feather name="check-circle" size={16} color="#10B981" />
+                  ) : (
+                    <Text className="text-xs text-gray-400 text-center">Zorunlu</Text>
+                  )}
+                </View>
+              </View>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              onPress={() => setActiveModal('experience')}
+              className={`flex-1 p-4 rounded-xl shadow-sm ${cvData.experience ? 'bg-blue-50 border border-blue-100' : 'bg-white'}`}
+              style={{ elevation: 1 }}
+            >
+              <View className="items-center">
+                <View className={`p-3 rounded-full mb-2 ${cvData.experience ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                  <Feather name="briefcase" size={24} color={cvData.experience ? "#2563EB" : "#6B7280"} />
+                </View>
+                <Text className={`text-base font-medium mb-1 ${cvData.experience ? 'text-blue-700' : 'text-gray-800'}`}>
+                  İş Deneyimi
+                </Text>
+                <View className="items-center justify-center">
+                  {cvData.experience ? (
+                    <Feather name="check-circle" size={16} color="#10B981" />
+                  ) : (
+                    <Text className="text-xs text-gray-400 text-center">Önerilen</Text>
+                  )}
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+          
+          <View className="flex-row mb-4 gap-3">
+            <TouchableOpacity
+              onPress={() => setActiveModal('skills')}
+              className={`flex-1 p-4 rounded-xl shadow-sm ${cvData.skills ? 'bg-blue-50 border border-blue-100' : 'bg-white'}`}
+              style={{ elevation: 1 }}
+            >
+              <View className="items-center">
+                <View className={`p-3 rounded-full mb-2 ${cvData.skills ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                  <Feather name="star" size={24} color={cvData.skills ? "#2563EB" : "#6B7280"} />
+                </View>
+                <Text className={`text-base font-medium mb-1 ${cvData.skills ? 'text-blue-700' : 'text-gray-800'}`}>
+                  Beceriler
+                </Text>
+                <View className="items-center justify-center">
+                  {cvData.skills ? (
+                    <Feather name="check-circle" size={16} color="#10B981" />
+                  ) : (
+                    <Text className="text-xs text-gray-400 text-center">Önerilen</Text>
+                  )}
+                </View>
+              </View>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              onPress={() => setActiveModal('projects')}
+              className={`flex-1 p-4 rounded-xl shadow-sm ${cvData.projects ? 'bg-blue-50 border border-blue-100' : 'bg-white'}`}
+              style={{ elevation: 1 }}
+            >
+              <View className="items-center">
+                <View className={`p-3 rounded-full mb-2 ${cvData.projects ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                  <Feather name="code" size={24} color={cvData.projects ? "#2563EB" : "#6B7280"} />
+                </View>
+                <Text className={`text-base font-medium mb-1 ${cvData.projects ? 'text-blue-700' : 'text-gray-800'}`}>
+                  Projeler
+                </Text>
+                <View className="items-center justify-center">
+                  {cvData.projects ? (
+                    <Feather name="check-circle" size={16} color="#10B981" />
+                  ) : (
+                    <Text className="text-xs text-gray-400 text-center">İsteğe Bağlı</Text>
+                  )}
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+          
+          <View className="flex-row mb-4 gap-3">
+            <TouchableOpacity
+              onPress={() => setActiveModal('certificates')}
+              className={`flex-1 p-4 rounded-xl shadow-sm ${cvData.certificates ? 'bg-blue-50 border border-blue-100' : 'bg-white'}`}
+              style={{ elevation: 1 }}
+            >
+              <View className="items-center">
+                <View className={`p-3 rounded-full mb-2 ${cvData.certificates ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                  <Feather name="award" size={24} color={cvData.certificates ? "#2563EB" : "#6B7280"} />
+                </View>
+                <Text className={`text-base font-medium mb-1 ${cvData.certificates ? 'text-blue-700' : 'text-gray-800'}`}>
+                  Sertifikalar
+                </Text>
+                <View className="items-center justify-center">
+                  {cvData.certificates ? (
+                    <Feather name="check-circle" size={16} color="#10B981" />
+                  ) : (
+                    <Text className="text-xs text-gray-400 text-center">İsteğe Bağlı</Text>
+                  )}
+                </View>
+              </View>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              onPress={() => setActiveModal('languages')}
+              className={`flex-1 p-4 rounded-xl shadow-sm ${cvData.languages ? 'bg-blue-50 border border-blue-100' : 'bg-white'}`}
+              style={{ elevation: 1 }}
+            >
+              <View className="items-center">
+                <View className={`p-3 rounded-full mb-2 ${cvData.languages ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                  <Feather name="globe" size={24} color={cvData.languages ? "#2563EB" : "#6B7280"} />
+                </View>
+                <Text className={`text-base font-medium mb-1 ${cvData.languages ? 'text-blue-700' : 'text-gray-800'}`}>
+                  Yabancı Diller
+                </Text>
+                <View className="items-center justify-center">
+                  {cvData.languages ? (
+                    <Feather name="check-circle" size={16} color="#10B981" />
+                  ) : (
+                    <Text className="text-xs text-gray-400 text-center">İsteğe Bağlı</Text>
+                  )}
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+          
+          <View className="flex-row mb-4 gap-3">
+            <TouchableOpacity
+              onPress={() => setActiveModal('references')}
+              className={`flex-1 p-4 rounded-xl shadow-sm ${cvData.references ? 'bg-blue-50 border border-blue-100' : 'bg-white'}`}
+              style={{ elevation: 1 }}
+            >
+              <View className="items-center">
+                <View className={`p-3 rounded-full mb-2 ${cvData.references ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                  <Feather name="users" size={24} color={cvData.references ? "#2563EB" : "#6B7280"} />
+                </View>
+                <Text className={`text-base font-medium mb-1 ${cvData.references ? 'text-blue-700' : 'text-gray-800'}`}>
+                  Referanslar
+                </Text>
+                <View className="items-center justify-center">
+                  {cvData.references ? (
+                    <Feather name="check-circle" size={16} color="#10B981" />
+                  ) : (
+                    <Text className="text-xs text-gray-400 text-center">İsteğe Bağlı</Text>
+                  )}
+                </View>
+              </View>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              onPress={() => setActiveModal('socialMedia')}
+              className={`flex-1 p-4 rounded-xl shadow-sm ${cvData.socialMedia ? 'bg-blue-50 border border-blue-100' : 'bg-white'}`}
+              style={{ elevation: 1 }}
+            >
+              <View className="items-center">
+                <View className={`p-3 rounded-full mb-2 ${cvData.socialMedia ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                  <Feather name="link" size={24} color={cvData.socialMedia ? "#2563EB" : "#6B7280"} />
+                </View>
+                <Text className={`text-base font-medium mb-1 ${cvData.socialMedia ? 'text-blue-700' : 'text-gray-800'}`}>
+                  Sosyal Medya
+                </Text>
+                <View className="items-center justify-center">
+                  {cvData.socialMedia ? (
+                    <Feather name="check-circle" size={16} color="#10B981" />
+                  ) : (
+                    <Text className="text-xs text-gray-400 text-center">İsteğe Bağlı</Text>
+                  )}
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+          
+          <View className="bg-amber-50 border border-amber-100 rounded-xl p-4 mt-6 mb-8">
+            <View className="flex-row items-start">
+              <Feather name="info" size={20} color="#F59E0B" style={{ marginTop: 2, marginRight: 10 }} />
+              <View className="flex-1">
+                <Text className="text-amber-800 font-medium mb-1">CV Hazırlama İpucu</Text>
+                <Text className="text-amber-700 text-sm">
+                  Zorunlu alanları doldurduktan sonra, diğer bölümleri de olabildiğince eksiksiz doldurmak işe alım sürecinde size avantaj sağlayacaktır.
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        
+        <View className="mb-10">
+          <TouchableOpacity
+            className={`${loading ? 'bg-blue-400' : 'bg-blue-600'} rounded-xl py-4 shadow-md`}
+            onPress={handleCreateCV}
+            disabled={loading}
+          >
+            <View className="flex-row items-center justify-center">
+              {loading ? (
+                <>
+                  <ActivityIndicator color="#FFFFFF" size="small" style={{ marginRight: 10 }} />
+                  <Text className="text-white font-bold text-lg">
+                    {isEditMode ? 'Güncelleniyor...' : 'Oluşturuluyor...'}
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Feather name={isEditMode ? "save" : "check-circle"} size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+                  <Text className="text-white font-bold text-lg">
+                    {isEditMode ? 'CV Güncelle' : 'CV Oluştur'}
+                  </Text>
+                </>
+              )}
+            </View>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
-      
 
       {activeModal && renderModal()}
     </SafeAreaView>

@@ -3,16 +3,16 @@ import React from 'react';
 import { Platform, Image, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import logo_home from '../../assets/images/logo/logo_home.png';
+import logo_home from '../../assets/images/logo/cvgen.png';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  // Sabit "light" teması kullanıyoruz
+  const colorScheme = 'light';
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: Colors[colorScheme].tint,
         headerShown: true,
         tabBarStyle: Platform.select({
           ios: {
@@ -41,13 +41,13 @@ export default function TabLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          headerTitle: '',
-          headerLeft: () => (
+          headerTitle: () => (
             <Image
               source={logo_home} 
-              style={{ width: 150, height: 30, marginLeft: 10 }}
+              style={{ width: 150, height: 30 }}
             />
           ),
+          headerTitleAlign: 'center',
           headerRight: () => (
             <Link href={'/(screens)/notifications'} className='mr-4'>
               <Feather name="bell" size={18} color="black" />
@@ -66,13 +66,13 @@ export default function TabLayout() {
       <Tabs.Screen
         name="create"
         options={{
-          headerTitle: '',
-          headerLeft: () => (
+          headerTitle: () => (
             <Image
               source={logo_home}
-              style={{ width: 150, height: 30, marginLeft: 10 }}
+              style={{ width: 150, height: 30 }}
             />
           ),
+          headerTitleAlign: 'center',
           tabBarIcon: ({ focused, color }) => (
             <Feather
               name="plus-circle"
@@ -86,13 +86,13 @@ export default function TabLayout() {
       <Tabs.Screen
         name="account"
         options={{
-          headerTitle: '',
-          headerLeft: () => (
+          headerTitle: () => (
             <Image
               source={logo_home}
-              style={{ width: 150, height: 30, marginLeft: 10 }}
+              style={{ width: 150, height: 30 }}
             />
           ),
+          headerTitleAlign: 'center',
           tabBarIcon: ({ focused, color }) => (
             <Feather
               name="user"

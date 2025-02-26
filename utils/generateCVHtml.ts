@@ -5,6 +5,9 @@ import { elegantTemplate } from '../lib/templates/elegant';
 import { feminineTemplate } from '../lib/templates/feminine';
 import { minimalistTemplate } from '../lib/templates/minimalist';
 import { darkModernTemplate } from '../lib/templates/darkModern';
+import { corporateTemplate } from '../lib/templates/corporate';
+import { atsMinimalTemplate } from '../lib/templates/atsMinimal';
+import { twoColumnTemplate } from '../lib/templates/twoColumn';
 
 interface CVData {
     id: string;
@@ -98,6 +101,12 @@ const getTemplate = (templateId: TemplateId) => {
       return minimalistTemplate;
     case 'darkModern':
       return darkModernTemplate;
+    case 'corporate':
+      return corporateTemplate;
+    case 'atsMinimal':
+      return atsMinimalTemplate;
+    case 'twoColumn':
+      return twoColumnTemplate;
     default:
       return modernTemplate;
   }

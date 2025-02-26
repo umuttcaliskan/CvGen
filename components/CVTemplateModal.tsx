@@ -25,6 +25,9 @@ const CVTemplateModal: React.FC<CVTemplateModalProps> = ({ isVisible, onClose, o
     { id: 'feminine', name: 'Feminine', image: require('../assets/images/cv3.png'), icon: require('../assets/images/icon.png') },
     { id: 'darkModern', name: 'Dark Modern', image: require('../assets/images/cv4.png'), icon: require('../assets/images/icon.png') },
     { id: 'minimalist', name: 'Minimalist', image: require('../assets/images/cv5.png'), icon: require('../assets/images/icon.png') },
+    { id: 'corporate', name: 'Kurumsal', image: require('../assets/images/cv7.png'), icon: require('../assets/images/icon.png') },
+    { id: 'atsMinimal', name: 'ATS Uyumlu', image: require('../assets/images/cv7.png'), icon: require('../assets/images/icon.png') },
+    { id: 'twoColumn', name: 'İki Sütunlu', image: require('../assets/images/cv7.png'), icon: require('../assets/images/icon.png') },
   ];
 
   const [selectedId, setSelectedId] = useState<TemplateId>('modern');
