@@ -73,6 +73,23 @@ const ScreensLayout = () => {
         }} 
       />
       <Stack.Screen 
+        name="privacy" 
+        options={{
+          headerShown: true,
+          title: 'Gizlilik Sözleşmesi',
+          headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#fff',
+          },
+          headerShadowVisible: false,
+          headerTitleStyle: {
+            color: '#1f2937',
+            fontSize: 16,
+          },
+          headerTintColor: '#1f2937',
+        }} 
+      />
+      <Stack.Screen 
         name="editProfile" 
         options={{
           headerShown: true,

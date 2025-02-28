@@ -1,21 +1,23 @@
 {
   "expo": {
-    "name": "CvGen | CV Oluşturucu",
+    "name": "CvGen",
     "slug": "CvGen",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
-    "icon": "./assets/images/logo/icon.png",
+    "icon": "./assets/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.picksoso.cvgen"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo/icon.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.picksoso.cvgen"
     },
     "web": {
       "bundler": "metro",
@@ -27,7 +29,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/logo/icon.png",
+          "image": "./assets/images/splash-icon.png",
           "imageWidth": 300,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
@@ -36,6 +38,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "9979e29d-8516-4df1-a754-3b9336cbabcf"
+      }
     }
   }
 }

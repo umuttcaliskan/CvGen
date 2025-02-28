@@ -205,6 +205,8 @@ const Profile = () => {
                 <View className="h-[1px] bg-gray-100 my-2" />
                 <ProfileButton title="Uygulamayı Değerlendir" route="./home" icon="star" />
                 <View className="h-[1px] bg-gray-100 my-2" />
+                <ProfileButton title="Gizlilik Sözleşmesi" route="../(screens)/privacy" icon="shield" />
+                <View className="h-[1px] bg-gray-100 my-2" />
                 <ProfileButton title="Şartlar ve Koşullar" route="../(screens)/terms" icon="file-text" />
               </View>
             </View>

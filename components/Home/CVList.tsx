@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Image, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { CVData } from '../../app/types/cv';
+import { CVData } from '../../src/types/cv';
 
 interface CVListProps {
   loading: boolean;

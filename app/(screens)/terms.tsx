@@ -53,7 +53,7 @@ const TermsScreen: React.FC = () => {
             Son güncelleme: {new Date().toLocaleDateString()}
           </Text>
           <Text className="text-xs text-gray-400 text-center mt-2 mb-1">
-             PickSoSo © 2024. Tüm hakları saklıdır.
+             CvGen CV Oluşturucu © 2024. Tüm hakları saklıdır.
           </Text>
         </View>
       </ScrollView>
@@ -64,7 +64,7 @@ const TermsScreen: React.FC = () => {
 const sections = [
   {
     title: "1. Giriş",
-    content: "Bu Şartlar ve Koşullar, PickSoSo CV Maker uygulamasını ('Uygulama') kullanımınızı düzenler. Uygulamayı kullanarak bu şartları kabul etmiş olursunuz. Bu şartları kabul etmiyorsanız, lütfen uygulamayı kullanmayın."
+    content: "Bu Şartlar ve Koşullar, CvGen CV Oluşturucu uygulamasını ('Uygulama') kullanımınızı düzenler. Uygulamayı kullanarak bu şartları kabul etmiş olursunuz. Bu şartları kabul etmiyorsanız, lütfen uygulamayı kullanmayın."
   },
   {
     title: "2. Hesap Oluşturma ve Güvenlik",
@@ -105,18 +105,18 @@ const sections = [
   {
     title: "6. Premium Özellikler ve Ödeme",
     content: [
-      "6.1. Premium özelliklere erişim için ödeme yapmanız gerekir.",
+      "6.1. Premium özelliklere erişim için ödeme yapmanız gerekebilir.",
       "6.2. Ödemeler güvenli ödeme sistemleri üzerinden gerçekleştirilir.",
-      "6.3. Abonelikler otomatik olarak yenilenir, dilediğiniz zaman iptal edebilirsiniz.",
-      "6.4. İade politikamız yasal düzenlemelere uygundur."
+      "6.3. Abonelikler, ayarlarınızda aksi belirtilmedikçe otomatik olarak yenilenir.",
+      "6.4. İade politikamız yasal düzenlemelere uygundur ve uygulama içinde belirtilmiştir."
     ]
   },
   {
     title: "7. Fikri Mülkiyet Hakları",
     content: [
-      "7.1. Uygulama ve içeriğinin tüm hakları bize aittir.",
+      "7.1. CvGen CV Oluşturucu uygulaması ve içeriğinin tüm hakları bize aittir.",
       "7.2. CV şablonları ve tasarımlar lisans altında korunmaktadır.",
-      "7.3. Kullanıcı içerikleri hariç hiçbir içeriği kopyalayamaz veya değiştiremezsiniz.",
+      "7.3. Kendi oluşturduğunuz CV içerikleri hariç hiçbir içeriği kopyalayamaz veya değiştiremezsiniz.",
       "7.4. Logo ve markamızı izinsiz kullanamazsınız."
     ]
   },
@@ -125,7 +125,7 @@ const sections = [
     content: [
       "8.1. Uygulama 'olduğu gibi' sunulmaktadır.",
       "8.2. Kesintisiz veya hatasız çalışma garantisi vermiyoruz.",
-      "8.3. Doğrudan veya dolaylı zararlardan sorumlu değiliz.",
+      "8.3. CV'lerinizin içeriğinden ve bunların kullanımından doğabilecek sonuçlardan sorumlu değiliz.",
       "8.4. Üçüncü taraf hizmetlerinden kaynaklanan sorunlardan sorumlu değiliz."
     ]
   },
@@ -142,7 +142,7 @@ const sections = [
     title: "10. Değişiklikler ve Güncellemeler",
     content: [
       "10.1. Bu şartları dilediğimiz zaman değiştirebiliriz.",
-      "10.2. Önemli değişiklikler e-posta ile bildirilir.",
+      "10.2. Önemli değişiklikler uygulama içi bildirimler veya e-posta ile bildirilir.",
       "10.3. Değişiklikler yayınlandığı tarihte yürürlüğe girer.",
       "10.4. Değişiklikleri kabul etmiyorsanız uygulamayı kullanmayı bırakmalısınız."
     ]

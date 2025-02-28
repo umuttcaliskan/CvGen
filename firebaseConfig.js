@@ -26,18 +26,11 @@ if (!firebase.apps.length) {
     
     // Firestore için offline depolama ayarları
     firebase.firestore().settings({
-        cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
-    });
-
-    // Firestore kalıcılık özelliğini etkinleştir
-    firebase.firestore().enablePersistence({
+        cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
+        merge: true,
+        // Çoklu sekme desteği ile kalıcılık özelliğini etkinleştir
+        persistence: true,
         synchronizeTabs: true
-    }).catch((err) => {
-        if (err.code === 'failed-precondition') {
-            console.warn('Persistence failed: Multiple tabs open');
-        } else if (err.code === 'unimplemented') {
-            console.warn('Persistence is not available');
-        }
     });
 }
 
