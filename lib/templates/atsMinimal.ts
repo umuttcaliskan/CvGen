@@ -134,6 +134,25 @@ export const atsMinimalTemplate = {
                 margin-bottom: 5px;
                 padding-bottom: 5px;
                 border-bottom: 1px dotted #eee;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .projects-section {
+                page-break-inside: auto;
+            }
+            
+            .projects-section .section-heading,
+            .projects-section .first-project {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            
+            /* Eğer başlık ve ilk proje birlikte sığmazsa, ikisi birlikte yeni sayfaya geçer */
+            .projects-section .section-heading {
+                page-break-after: avoid;
+                break-after: avoid;
             }
             
             @media print {
@@ -151,6 +170,16 @@ export const atsMinimalTemplate = {
                 .profile-image {
                     width: 150px;
                     height: 150px;
+                }
+                
+                /* İlk sayfa için kenar boşlukları */
+                @page:first {
+                    margin-top: 10px;
+                }
+                
+                /* İkinci ve sonraki sayfalar için kenar boşlukları */
+                @page {
+                    margin-top: 40px;
                 }
             }
         </style>
@@ -185,6 +214,19 @@ export const atsMinimalTemplate = {
             
             <div class="main-content">
                 <div class="left-column">
+                    ${cv.education?.length > 0 ? `
+                    <div class="section">
+                        <h2 class="section-heading">Eğitim</h2>
+                        ${cv.education.map((edu: any) => `
+                        <div class="education-item">
+                            <div class="item-title">${edu.schoolName}</div>
+                            <div class="item-subtitle">${edu.department}</div>
+                            <div class="item-date">${edu.startDate} - ${edu.endDate}</div>
+                        </div>
+                        `).join('')}
+                    </div>
+                    ` : ''}
+                    
                     ${cv.experience?.length > 0 ? `
                     <div class="section">
                         <h2 class="section-heading">Deneyim</h2>
@@ -199,24 +241,11 @@ export const atsMinimalTemplate = {
                     </div>
                     ` : ''}
                     
-                    ${cv.education?.length > 0 ? `
-                    <div class="section">
-                        <h2 class="section-heading">Eğitim</h2>
-                        ${cv.education.map((edu: any) => `
-                        <div class="education-item">
-                            <div class="item-title">${edu.schoolName}</div>
-                            <div class="item-subtitle">${edu.department}</div>
-                            <div class="item-date">${edu.startDate} - ${edu.endDate}</div>
-                        </div>
-                        `).join('')}
-                    </div>
-                    ` : ''}
-                    
                     ${cv.projects?.length > 0 ? `
-                    <div class="section">
+                    <div class="section projects-section">
                         <h2 class="section-heading">Projeler</h2>
-                        ${cv.projects.map((project: any) => `
-                        <div class="project-item">
+                        ${cv.projects.map((project: any, index: number) => `
+                        <div class="project-item ${index === 0 ? 'first-project' : ''}">
                             <div class="item-title">${project.name}</div>
                             <div class="item-date">${project.startDate} - ${project.endDate}</div>
                             <div class="item-description">${project.description}</div>

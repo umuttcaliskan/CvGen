@@ -169,6 +169,16 @@ export const modernTemplate = {
                     box-shadow: none;
                     max-width: 100%;
                 }
+                
+                .section {
+                    break-inside: avoid;
+                    page-break-inside: avoid;
+                }
+                
+                .exp-item, .edu-item {
+                    break-inside: avoid;
+                    page-break-inside: avoid;
+                }
             }
         </style>
     </head>
@@ -197,6 +207,34 @@ export const modernTemplate = {
                             ${cv.personal?.address ? `<div><span>📍</span> ${cv.personal.address}</div>` : ''}
                         </div>
                     </div>
+                    
+                    ${cv.personal?.birthDate || cv.personal?.maritalStatus || cv.personal?.militaryStatus || cv.personal?.drivingLicense ? `
+                        <div class="section">
+                            <h2 class="section-title">Kişisel Bilgiler</h2>
+                            <div class="contact-info">
+                                ${cv.personal?.birthDate ? `<div><span>🎂</span> ${cv.personal.birthDate}</div>` : ''}
+                                ${cv.personal?.maritalStatus ? `<div><span>💍</span> ${cv.personal.maritalStatus}</div>` : ''}
+                                ${cv.personal?.militaryStatus ? `<div><span>🛡️</span> ${cv.personal.militaryStatus}</div>` : ''}
+                                ${cv.personal?.drivingLicense ? `<div><span>🚗</span> ${cv.personal.drivingLicense}</div>` : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${cv.socialMedia?.length > 0 ? `
+                        <div class="section">
+                            <h2 class="section-title">Sosyal Medya</h2>
+                            <div class="contact-info">
+                                ${cv.socialMedia.map((social: any) => `
+                                    <div>
+                                        <span>🔗</span> 
+                                        <a href="${social.url}" style="color: #1976d2; text-decoration: none;" target="_blank">
+                                            ${getPlatformName(social.platform)}: ${social.username}
+                                        </a>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
                     
                     ${cv.skills?.length > 0 ? `
                         <div class="section">
@@ -268,40 +306,46 @@ export const modernTemplate = {
                     ${cv.education?.length > 0 ? `
                         <div class="section">
                             <h2 class="section-title">Eğitim</h2>
-                            ${cv.education.map((edu: any) => `
-                                <div class="edu-item">
-                                    <div class="edu-title">${edu.department}</div>
-                                    <div class="edu-school">${edu.schoolName}</div>
-                                    <div class="edu-date">${edu.startDate} - ${edu.endDate}</div>
-                                </div>
-                            `).join('')}
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                ${cv.education.map((edu: any) => `
+                                    <div class="edu-item">
+                                        <div class="edu-title">${edu.department}</div>
+                                        <div class="edu-school">${edu.schoolName}</div>
+                                        <div class="edu-date">${edu.startDate} - ${edu.endDate}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
                         </div>
                     ` : ''}
                     
                     ${cv.certificates?.length > 0 ? `
                         <div class="section">
                             <h2 class="section-title">Sertifikalar</h2>
-                            ${cv.certificates.map((cert: any) => `
-                                <div class="edu-item">
-                                    <div class="edu-title">${cert.name}</div>
-                                    <div class="edu-school">${cert.institution}</div>
-                                    <div class="edu-date">${cert.date}</div>
-                                </div>
-                            `).join('')}
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                ${cv.certificates.map((cert: any) => `
+                                    <div class="edu-item">
+                                        <div class="edu-title">${cert.name}</div>
+                                        <div class="edu-school">${cert.institution}</div>
+                                        <div class="edu-date">${cert.date}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
                         </div>
                     ` : ''}
                     
                     ${cv.references?.length > 0 ? `
                         <div class="section">
                             <h2 class="section-title">Referanslar</h2>
-                            ${cv.references.map((ref: any) => `
-                                <div class="exp-item">
-                                    <div class="exp-title">${ref.fullName}</div>
-                                    <div class="exp-company">${ref.position}, ${ref.company}</div>
-                                    ${ref.email ? `<div>📧 ${ref.email}</div>` : ''}
-                                    ${ref.phone ? `<div>📱 ${ref.phone}</div>` : ''}
-                                </div>
-                            `).join('')}
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                ${cv.references.map((ref: any) => `
+                                    <div class="exp-item">
+                                        <div class="exp-title">${ref.fullName}</div>
+                                        <div class="exp-company">${ref.position}, ${ref.company}</div>
+                                        ${ref.email ? `<div>📧 ${ref.email}</div>` : ''}
+                                        ${ref.phone ? `<div>📱 ${ref.phone}</div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
                         </div>
                     ` : ''}
                 </div>
@@ -311,3 +355,24 @@ export const modernTemplate = {
     </html>
   `
 }; 
+
+// Sosyal medya platformu adını düzgün formatta almak için yardımcı fonksiyon
+function getPlatformName(platform: string): string {
+    const platform_lc = platform.toLowerCase();
+    if (platform_lc.includes('linkedin')) return 'LinkedIn';
+    if (platform_lc.includes('github')) return 'GitHub';
+    if (platform_lc.includes('twitter')) return 'Twitter';
+    if (platform_lc.includes('x')) return 'X';
+    if (platform_lc.includes('facebook')) return 'Facebook';
+    if (platform_lc.includes('instagram')) return 'Instagram';
+    if (platform_lc.includes('youtube')) return 'YouTube';
+    if (platform_lc.includes('medium')) return 'Medium';
+    if (platform_lc.includes('stackoverflow')) return 'Stack Overflow';
+    if (platform_lc.includes('behance')) return 'Behance';
+    if (platform_lc.includes('dribbble')) return 'Dribbble';
+    if (platform_lc.includes('pinterest')) return 'Pinterest';
+    if (platform_lc.includes('website')) return 'Web Sitesi';
+    
+    // Platform adı bulunamadıysa, girilenin ilk harfini büyük yaparak göster
+    return platform.charAt(0).toUpperCase() + platform.slice(1);
+} 

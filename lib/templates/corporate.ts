@@ -81,6 +81,8 @@ export const corporateTemplate = {
             
             .section {
                 margin-bottom: 25px;
+                page-break-inside: auto;
+                break-inside: auto;
             }
             
             .section-heading {
@@ -90,11 +92,14 @@ export const corporateTemplate = {
                 border-bottom: 1px solid #0a4275;
                 padding-bottom: 5px;
                 margin-bottom: 15px;
+                page-break-after: avoid;
+                break-after: avoid;
             }
             
             .item {
                 margin-bottom: 15px;
                 page-break-inside: avoid;
+                break-inside: avoid;
             }
             
             .item-title {
@@ -137,6 +142,12 @@ export const corporateTemplate = {
                 gap: 15px;
             }
             
+            /* İlk öğe ve başlık için özel kural */
+            .section-heading + .item {
+                page-break-before: avoid;
+                break-before: avoid;
+            }
+            
             @media print {
                 body {
                     font-size: 12pt;
@@ -147,6 +158,17 @@ export const corporateTemplate = {
                     max-width: none;
                     padding: 20px;
                     box-shadow: none;
+                }
+                
+                /* Modern tarayıcılar için örpüşebilir kurallar */
+                h1, h2, h3, h4, h5, h6 {
+                    page-break-after: avoid;
+                    break-after: avoid;
+                }
+                
+                .section {
+                    page-break-inside: auto;
+                    break-inside: auto;
                 }
             }
         </style>
@@ -185,7 +207,7 @@ export const corporateTemplate = {
             
             ${cv.about ? `
             <div class="section">
-                <div class="section-heading">Profesyonel Özet</div>
+                <div class="section-heading">Hakkımda</div>
                 <p>${cv.about}</p>
             </div>
             ` : ''}

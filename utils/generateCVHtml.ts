@@ -1,13 +1,4 @@
-import { TemplateId } from '../lib/templates';
-import { modernTemplate } from '../lib/templates/modern';
-import { professionalTemplate } from '../lib/templates/professional';
-import { elegantTemplate } from '../lib/templates/elegant';
-import { feminineTemplate } from '../lib/templates/feminine';
-import { minimalistTemplate } from '../lib/templates/minimalist';
-import { darkModernTemplate } from '../lib/templates/darkModern';
-import { corporateTemplate } from '../lib/templates/corporate';
-import { atsMinimalTemplate } from '../lib/templates/atsMinimal';
-import { twoColumnTemplate } from '../lib/templates/twoColumn';
+import { TemplateId, getTemplate } from '../lib/templates';
 
 interface CVData {
     id: string;
@@ -62,6 +53,7 @@ interface CVData {
   }
   
 export const generateCVHtml = async (cv: CVData, profileImageUrl: string | null, templateId: TemplateId) => {
+  
   // Profil resmini base64'e dönüştür
   let base64Image = null;
   if (profileImageUrl) {
@@ -78,36 +70,9 @@ export const generateCVHtml = async (cv: CVData, profileImageUrl: string | null,
     }
   }
 
-  // Seçilen şablonu al
+  // Seçilen şablonu al ve HTML'i oluştur
   const template = getTemplate(templateId);
-  
-  // Şablonun HTML'ini oluştur ve base64 formatındaki profil resmini gönder
   const html = template.generateHTML(cv, base64Image as string | null);
 
   return html;
-};
-
-const getTemplate = (templateId: TemplateId) => {
-  switch (templateId) {
-    case 'modern':
-      return modernTemplate;
-    case 'professional':
-      return professionalTemplate;
-    case 'elegant':
-      return elegantTemplate;
-    case 'feminine':
-      return feminineTemplate;
-    case 'minimalist':
-      return minimalistTemplate;
-    case 'darkModern':
-      return darkModernTemplate;
-    case 'corporate':
-      return corporateTemplate;
-    case 'atsMinimal':
-      return atsMinimalTemplate;
-    case 'twoColumn':
-      return twoColumnTemplate;
-    default:
-      return modernTemplate;
-  }
 }; 

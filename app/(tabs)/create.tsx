@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, Platform, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, Platform, Alert, ActivityIndicator, TextInput } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import * as Progress from 'react-native-progress';
@@ -87,6 +87,7 @@ interface CVData {
     endDate: string;
     projectUrl: string;
   }> | null;
+  title: string | null;
 }
 
 const initialCVData = {
@@ -99,7 +100,8 @@ const initialCVData = {
   languages: null,
   references: null,
   socialMedia: null,
-  projects: null
+  projects: null,
+  title: null
 };
 
 const CreateScreen = () => {
@@ -189,7 +191,8 @@ const CreateScreen = () => {
     languages: null,
     references: null,
     socialMedia: null,
-    projects: null
+    projects: null,
+    title: null
   });
 
   const [loading, setLoading] = useState(false);
@@ -201,8 +204,6 @@ const CreateScreen = () => {
   }, [cvSections]);
 
   useEffect(() => {
-    console.log("Edit Mode:", params.editMode);
-    console.log("CV Data:", params.cvData);
     
     if (params.editMode === "true" && params.cvData) {
       try {
@@ -264,6 +265,12 @@ const CreateScreen = () => {
         return;
       }
 
+      const cvTitle = cvData.title || `CV ${new Date().toLocaleDateString('tr-TR')}`;
+      const updatedCvData = {
+        ...cvData,
+        title: cvTitle
+      };
+
       if (isEditMode && params.cvData) {
         try {
           const parsedCV = JSON.parse(params.cvData as string);
@@ -273,7 +280,7 @@ const CreateScreen = () => {
 
           const newCVData = {
             userId: currentUser.uid,
-            ...cvData,
+            ...updatedCvData, 
             updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
             createdAt: existingCVData?.createdAt || firebase.firestore.FieldValue.serverTimestamp()
           };
@@ -295,7 +302,7 @@ const CreateScreen = () => {
       } else {
         const newCVData = {
           userId: currentUser.uid,
-          ...cvData,
+          ...updatedCvData, 
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
@@ -460,6 +467,21 @@ const CreateScreen = () => {
             borderWidth={0}
             borderRadius={4}
           />
+        </View>
+        
+        <View className="mb-6">
+          <Text className="text-gray-700 font-medium mb-2">CV Başlığı</Text>
+          <View className="flex-row items-center border border-gray-300 rounded-xl bg-white overflow-hidden">
+            <View className="pl-4 pr-2">
+              <Feather name="file-text" size={20} color="#4B5563" />
+            </View>
+            <TextInput
+              className="flex-1 py-3 px-2"
+              placeholder="CV'nize bir isim verin (Ana CV, Yazılım Başvurusu vb.)"
+              value={cvData.title || ''}
+              onChangeText={(text) => setCvData(prev => ({ ...prev, title: text }))}
+            />
+          </View>
         </View>
         
         <View className="mb-6">

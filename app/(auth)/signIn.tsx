@@ -18,12 +18,39 @@ const LoginScreen: React.FC = () => {
   const handleLogin = async () => {
     try {
       const response = await firebase.auth().signInWithEmailAndPassword(email, password);
-      console.log('Giriş Yapıldı', response);
       Alert.alert('Hoşgeldiniz', 'Giriş başarıyla yapıldı');
       router.push('/(tabs)/home');
-    } catch (error) {
-      console.log('hata', error);
-      Alert.alert('Hata', 'Giriş yaparken bir hata oluştu');
+    } catch (error: any) {
+      console.log('Firebase hata detayları:', error);
+      console.log('Hata kodu:', error.code);
+      
+      let errorMessage = 'Giriş yaparken bir hata oluştu';
+      
+      if (error && error.code) {
+        switch(error.code) {
+          case 'auth/invalid-credential':
+          case 'auth/wrong-password':
+            errorMessage = 'Şifre hatalı. Lütfen tekrar deneyin.';
+            break;
+          case 'auth/user-not-found':
+            errorMessage = 'Bu e-posta adresiyle kayıtlı bir hesap bulunamadı.';
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = 'Çok fazla hatalı deneme yaptınız. Hesabınız geçici olarak kilitlendi. Lütfen daha sonra tekrar deneyin veya şifrenizi sıfırlayın.';
+            break;
+          case 'auth/user-disabled':
+            errorMessage = 'Bu hesap devre dışı bırakılmış. Lütfen destek ekibiyle iletişime geçin.';
+            break;
+          case 'auth/invalid-email':
+            errorMessage = 'Geçersiz e-posta formatı. Lütfen kontrol edip tekrar deneyin.';
+            break;
+          default:
+            errorMessage = `Giriş hatası: ${error.code}`;
+            break;
+        }
+      }
+      
+      Alert.alert('Hata', errorMessage);
     }
   };
 

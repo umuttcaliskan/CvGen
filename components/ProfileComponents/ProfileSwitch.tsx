@@ -1,20 +1,21 @@
 import { View, Text, Switch } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { Feather } from '@expo/vector-icons';
-import { firebase } from '../../firebaseConfig';
+import firebase from 'firebase/compat/app';
 import { useAuth } from '../../context/AuthContext';
+
+type FeatherIcon = React.ComponentProps<typeof Feather>['name'];
 
 interface ProfileSwitchProps {
   title: string;
-  icon: string;
-  type: 'emailNotifications' | 'pushNotifications';
+  icon: FeatherIcon;
+  type: string;
 }
 
 const ProfileSwitch: React.FC<ProfileSwitchProps> = ({ title, icon, type }) => {
   const [isEnabled, setIsEnabled] = useState(false);
   const { user } = useAuth();
 
-  // Başlangıçta mevcut ayarları getir
   useEffect(() => {
     const fetchNotificationSettings = async () => {
       if (user?.uid) {
@@ -52,22 +53,27 @@ const ProfileSwitch: React.FC<ProfileSwitchProps> = ({ title, icon, type }) => {
         });
     } catch (error) {
       console.error('Ayar güncellenirken hata:', error);
-      // Hata durumunda switch'i eski haline getir
       setIsEnabled(!newValue);
     }
   };
 
   return (
-    <View className="flex-row items-center bg-white p-4 rounded-lg shadow-sm mb-2">
-      <Feather name={icon as any} size={20} color="#4A4A4A" className="mr-3" />
-      <Text className="text-base text-black flex-grow ml-3">{title}</Text>
+    <View className="flex-row items-center justify-between bg-white p-4 rounded-lg mb-1">
+      <View className="flex-row items-center">
+        <View className="w-9 h-9 rounded-full bg-blue-50 justify-center items-center mr-3">
+          <Feather name={icon} size={18} color="#2563eb" />
+        </View>
+        <Text className="text-base font-medium text-gray-800">{title}</Text>
+      </View>
       <Switch
+        trackColor={{ false: '#e2e8f0', true: '#bfdbfe' }}
+        thumbColor={isEnabled ? '#2563eb' : '#a0aec0'}
+        ios_backgroundColor="#e2e8f0"
         onValueChange={toggleSwitch}
         value={isEnabled}
-        style={{ transform: [{ scaleX: 0.95 }, { scaleY: 0.95 }] }}
       />
     </View>
   );
 };
 
-export default ProfileSwitch; 
+export default ProfileSwitch;

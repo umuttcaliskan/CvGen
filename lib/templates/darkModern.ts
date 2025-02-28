@@ -127,6 +127,30 @@ export const darkModernTemplate = {
           background: rgba(255, 255, 255, 0.1);
           border-radius: 4px;
         }
+        
+        /* Referanslar için grid yapısı */
+        .references-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 15px;
+          margin-top: 10px;
+        }
+        .reference-item {
+          margin-bottom: 15px;
+          page-break-inside: avoid;
+          break-inside: avoid;
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 5px;
+          padding: 10px;
+        }
+        
+        /* Sayfa geçişlerinde bölünmeyi önleme */
+        @media print {
+          .experience-item, .education-item, .reference-item {
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+        }
       </style>
     </head>
     <body>
@@ -150,6 +174,26 @@ export const darkModernTemplate = {
             ${cv.personal?.email ? `<p>📧 ${cv.personal.email}</p>` : ''}
             ${cv.personal?.address ? `<p>📍 ${cv.personal.address}</p>` : ''}
           </div>
+
+          ${cv.personal?.birthDate || cv.personal?.maritalStatus || cv.personal?.militaryStatus || cv.personal?.drivingLicense || cv.personal?.nationality ? `
+            <div class="section-title">Kişisel Bilgiler</div>
+            <div class="contact-info">
+              ${cv.personal?.birthDate ? `<p>🎂 ${cv.personal.birthDate}</p>` : ''}
+              ${cv.personal?.maritalStatus ? `<p>💍 ${cv.personal.maritalStatus}</p>` : ''}
+              ${cv.personal?.militaryStatus ? `<p>🛡️ ${cv.personal.militaryStatus}</p>` : ''}
+              ${cv.personal?.drivingLicense ? `<p>🚗 ${cv.personal.drivingLicense}</p>` : ''}
+              ${cv.personal?.nationality ? `<p>🌍 ${cv.personal.nationality}</p>` : ''}
+            </div>
+          ` : ''}
+
+          ${cv.socialMedia?.length > 0 ? `
+            <div class="section-title">Sosyal Medya</div>
+            <div class="contact-info">
+              ${cv.socialMedia.map((social: any) => `
+                <p>🔗 ${getPlatformName(social.platform)}: ${social.username}</p>
+              `).join('')}
+            </div>
+          ` : ''}
 
           ${cv.languages?.length > 0 ? `
             <div class="section-title">Diller</div>
@@ -185,6 +229,19 @@ export const darkModernTemplate = {
             `).join('')}
           ` : ''}
 
+          ${cv.projects?.length > 0 ? `
+            <h3>Projeler</h3>
+            ${cv.projects.map((project: any) => `
+              <div class="experience-item">
+                <div class="item-title">${project.name}</div>
+                <div class="item-date">${project.startDate} - ${project.endDate}</div>
+                <p>${project.description}</p>
+                ${project.technologies ? `<div class="item-subtitle">Teknolojiler: ${project.technologies}</div>` : ''}
+                ${project.projectUrl ? `<div class="item-subtitle">URL: ${project.projectUrl}</div>` : ''}
+              </div>
+            `).join('')}
+          ` : ''}
+
           ${cv.certificates?.length > 0 ? `
             <h3>Sertifikalar</h3>
             <div class="skills-grid">
@@ -209,14 +266,16 @@ export const darkModernTemplate = {
 
           ${cv.references?.length > 0 ? `
             <h3>Referanslar</h3>
-            ${cv.references.map((ref: any) => `
-              <div class="experience-item">
-                <div class="item-title">${ref.fullName}</div>
-                <div class="item-subtitle">${ref.position} - ${ref.company}</div>
-                ${ref.email ? `<div class="item-date">📧 ${ref.email}</div>` : ''}
-                ${ref.phone ? `<div class="item-date">📞 ${ref.phone}</div>` : ''}
-              </div>
-            `).join('')}
+            <div class="references-grid">
+              ${cv.references.map((ref: any) => `
+                <div class="reference-item">
+                  <div class="item-title">${ref.fullName}</div>
+                  <div class="item-subtitle">${ref.position} - ${ref.company}</div>
+                  ${ref.email ? `<div class="item-date">📧 ${ref.email}</div>` : ''}
+                  ${ref.phone ? `<div class="item-date">📞 ${ref.phone}</div>` : ''}
+                </div>
+              `).join('')}
+            </div>
           ` : ''}
         </div>
       </div>
@@ -224,3 +283,24 @@ export const darkModernTemplate = {
     </html>
   `
 };
+
+// Sosyal medya platformu adını düzgün formatta almak için yardımcı fonksiyon
+function getPlatformName(platform: string): string {
+    const platform_lc = platform.toLowerCase();
+    if (platform_lc.includes('linkedin')) return 'LinkedIn';
+    if (platform_lc.includes('github')) return 'GitHub';
+    if (platform_lc.includes('twitter')) return 'Twitter';
+    if (platform_lc.includes('x')) return 'X';
+    if (platform_lc.includes('facebook')) return 'Facebook';
+    if (platform_lc.includes('instagram')) return 'Instagram';
+    if (platform_lc.includes('youtube')) return 'YouTube';
+    if (platform_lc.includes('medium')) return 'Medium';
+    if (platform_lc.includes('stackoverflow')) return 'Stack Overflow';
+    if (platform_lc.includes('behance')) return 'Behance';
+    if (platform_lc.includes('dribbble')) return 'Dribbble';
+    if (platform_lc.includes('pinterest')) return 'Pinterest';
+    if (platform_lc.includes('website')) return 'Web Sitesi';
+    
+    // Platform adı bulunamadıysa, girilenin ilk harfini büyük yaparak göster
+    return platform.charAt(0).toUpperCase() + platform.slice(1);
+}

@@ -18,6 +18,7 @@ import CareerTipsModal from '../../components/CareerTipsModal';
 interface CVData {
   id: string;
   userId: string;
+  title?: string;
   personal?: {
     fullName: string;
     email: string;
@@ -163,7 +164,7 @@ const CVModal: React.FC<CVModalProps> = React.memo(({ isVisible, onClose, cv }) 
           }
         }
 
-        const html = await generateCVHtml(cv, profileImageUrl, 'modern');
+        const html = await generateCVHtml(cv, profileImageUrl, templateId);
         
         const { uri } = await Print.printToFileAsync({
           html,
@@ -177,8 +178,9 @@ const CVModal: React.FC<CVModalProps> = React.memo(({ isVisible, onClose, cv }) 
         
         await Sharing.shareAsync(uri, {
           mimeType: 'application/pdf',
-          dialogTitle: 'CV\'yi İndir'
-        });
+          dialogTitle: 'CV\'yi İndir',
+          UTI: 'com.adobe.pdf',
+        } as any);
       } catch (error) {
         console.error('PDF indirme hatası:', error);
         Alert.alert('Hata', 'PDF indirme sırasında bir hata oluştu.');
@@ -673,11 +675,16 @@ const CVCard: React.FC<CVCardProps> = ({ cv, onPress }) => {
       }
 
       // CV HTML'ini oluştur ve profil resmini gönder
-      const html = await generateCVHtml(cv, profileImageUrl, 'modern');
+      const html = await generateCVHtml(cv, profileImageUrl, templateId);
+      
+      // CV adını belirle (boşsa "Isimsiz" olarak ayarla)
+      const cvName = cv.personal?.fullName || "Isimsiz";
+      const fileName = `CvGen_${cvName.replace(/\s+/g, '_')}`;
       
       const { uri } = await Print.printToFileAsync({
         html,
-        base64: false
+        base64: false,
+        // Expo-print dosya adını doğrudan desteklemediği için uri üzerinden işlem yapacağız
       });
       
       if (!(await Sharing.isAvailableAsync())) {
@@ -687,8 +694,9 @@ const CVCard: React.FC<CVCardProps> = ({ cv, onPress }) => {
       
       await Sharing.shareAsync(uri, {
         mimeType: 'application/pdf',
-        dialogTitle: 'CV\'yi İndir'
-      });
+        dialogTitle: 'CV\'yi İndir',
+        UTI: 'com.adobe.pdf',
+      } as any);
     } catch (error) {
       console.error('PDF indirme hatası:', error);
       Alert.alert('Hata', 'PDF indirme sırasında bir hata oluştu.');
@@ -699,7 +707,7 @@ const CVCard: React.FC<CVCardProps> = ({ cv, onPress }) => {
     <View style={styles.card}>
       <TouchableOpacity onPress={onPress} style={styles.cardContent}>
         <View style={styles.cardHeader}>
-          <Text style={styles.name}>{cv.personal?.fullName || 'İsimsiz'}</Text>
+          <Text style={styles.name}>{cv.title || cv.personal?.fullName || 'İsimsiz CV'}</Text>
           <Text style={styles.date}>{formatDate(cv.createdAt)}</Text>
         </View>
         <View style={styles.cardBody}>
@@ -928,7 +936,6 @@ const HomeScreen = () => {
         .collection('cvs')
         .where('userId', '==', currentUser.uid)
         .onSnapshot((snapshot) => {
-          // Duplicate kontrolü için Set kullan
           const uniqueIds = new Set();
           const cvs = snapshot.docs
             .filter(doc => {
@@ -1049,6 +1056,7 @@ const HomeScreen = () => {
   };
 
   const handleTemplateSelect = async (templateId: TemplateId, cv: CVData) => {
+    console.log("Ana bileşende seçilen şablon:", templateId);
     setShowTemplateModal(false);
     
     try {
@@ -1069,11 +1077,16 @@ const HomeScreen = () => {
       }
 
       // CV HTML'ini oluştur ve profil resmini gönder
-      const html = await generateCVHtml(cv, profileImageUrl, 'modern');
+      const html = await generateCVHtml(cv, profileImageUrl, templateId);
+      
+      // CV adını belirle (boşsa "Isimsiz" olarak ayarla)
+      const cvName = cv.personal?.fullName || "Isimsiz";
+      const fileName = `CvGen_${cvName.replace(/\s+/g, '_')}`;
       
       const { uri } = await Print.printToFileAsync({
         html,
-        base64: false
+        base64: false,
+        // Expo-print dosya adını doğrudan desteklemediği için uri üzerinden işlem yapacağız
       });
       
       if (!(await Sharing.isAvailableAsync())) {
@@ -1083,8 +1096,9 @@ const HomeScreen = () => {
       
       await Sharing.shareAsync(uri, {
         mimeType: 'application/pdf',
-        dialogTitle: 'CV\'yi İndir'
-      });
+        dialogTitle: 'CV\'yi İndir',
+        UTI: 'com.adobe.pdf',
+      } as any);
     } catch (error) {
       console.error('PDF indirme hatası:', error);
       Alert.alert('Hata', 'PDF indirme sırasında bir hata oluştu.');
@@ -1163,7 +1177,7 @@ const HomeScreen = () => {
                     </View>
                     <View className="ml-3">
                       <Text className="text-lg font-semibold text-gray-900">
-                        {cv.personal?.fullName || 'İsimsiz CV'}
+                        {cv.title || cv.personal?.fullName || 'İsimsiz CV'}
                       </Text>
                       <Text style={styles.date}>{formatDate(cv.createdAt)}</Text>
                     </View>
@@ -1214,7 +1228,14 @@ const HomeScreen = () => {
             ))
           ) : (
             <View className="flex items-center justify-center w-full py-8">
-              <Text className="text-gray-500">Henüz CV oluşturmadınız.</Text>
+              <Text className="text-gray-500 mb-4">Henüz CV oluşturmadınız.</Text>
+              <TouchableOpacity 
+                onPress={() => router.push('/(tabs)/create')}
+                className="bg-blue-500 px-6 py-3 rounded-xl flex-row items-center"
+              >
+                <Feather name="plus" size={18} color="#fff" />
+                <Text className="text-white font-semibold ml-2">İlk CV'nizi Oluşturun</Text>
+              </TouchableOpacity>
             </View>
           )}
         </ScrollView>
