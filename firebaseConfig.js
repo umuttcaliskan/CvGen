@@ -19,13 +19,11 @@ let app;
 if (!firebase.apps.length) {
     app = firebase.initializeApp(firebaseConfig);
     
-    // Auth'u AsyncStorage ile başlat
     initializeAuth(app, {
         persistence: getReactNativePersistence(AsyncStorage)
     });
 }
 
-// Firestore örneğini oluştur
 const firestore = firebase.firestore();
 
-export { firebase, firestore }; // Hem firebase hem de firestore'u dışa aktar
+export { firebase, firestore };

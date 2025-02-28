@@ -14,23 +14,22 @@ interface Template {
   id: string;
   name: string;
   image: any;
-  icon: any;
 }
 
 const CVTemplateModal: React.FC<CVTemplateModalProps> = ({ isVisible, onClose, onSelectTemplate }) => {
   const templates = [
-    { id: 'corporate', name: 'İş Dünyası', image: require('../assets/images/corporate.png'), icon: require('../assets/images/icon.png') },
-    { id: 'atsMinimal', name: 'Dijital Geçiş', image: require('../assets/images/atsUyumlu.png'), icon: require('../assets/images/icon.png') },
-    { id: 'minimalist', name: 'Öz ve Net', image: require('../assets/images/minimalist.png'), icon: require('../assets/images/icon.png') },
-    { id: 'twoColumn', name: 'Nova', image: require('../assets/images/whiteTwoColumn.png'), icon: require('../assets/images/icon.png') },
-    { id: 'darkModern', name: 'Gece Mavisi', image: require('../assets/images/darkmodern.png'), icon: require('../assets/images/icon.png') },
-    { id: 'greenModern', name: 'Bahar Esintisi', image: require('../assets/images/greenModern.png'), icon: require('../assets/images/icon.png') },
-    { id: 'brownElegant', name: 'Toprak Tonu', image: require('../assets/images/elite.png'), icon: require('../assets/images/icon.png') },
-    { id: 'professional', name: 'Kariyer Odaklı', image: require('../assets/images/professional.png'), icon: require('../assets/images/icon.png') },
-    { id: 'modern', name: 'Mavi Ufuklar', image: require('../assets/images/modern.png'), icon: require('../assets/images/icon.png') },
-    { id: 'elegant', name: 'İnce Detay', image: require('../assets/images/elegant.png'), icon: require('../assets/images/icon.png') },
-    { id: 'feminine', name: 'Yalın Zarafet', image: require('../assets/images/feminine.png'), icon: require('../assets/images/icon.png') },
-    { id: 'crystalClear', name: 'Kristal Netlik', image: require('../assets/images/crystal.png'), icon: require('../assets/images/icon.png') },
+    { id: 'corporate', name: 'İş Dünyası', image: require('../assets/images/template/corporate.png')},
+    { id: 'atsMinimal', name: 'Dijital Geçiş', image: require('../assets/images/template/atsUyumlu.png') },
+    { id: 'minimalist', name: 'Öz ve Net', image: require('../assets/images/template/minimalist.png') },
+    { id: 'twoColumn', name: 'Nova', image: require('../assets/images/template/whiteTwoColumn.png') },
+    { id: 'darkModern', name: 'Gece Mavisi', image: require('../assets/images/template/darkmodern.png') },
+    { id: 'greenModern', name: 'Bahar Esintisi', image: require('../assets/images/template/greenModern.png') },
+    { id: 'brownElegant', name: 'Toprak Tonu', image: require('../assets/images/template/elite.png') },
+    { id: 'professional', name: 'Kariyer Odaklı', image: require('../assets/images/template/professional.png') },
+    { id: 'modern', name: 'Mavi Ufuklar', image: require('../assets/images/template/modern.png') },
+    { id: 'elegant', name: 'İnce Detay', image: require('../assets/images/template/elegant.png') },
+    { id: 'feminine', name: 'Yalın Zarafet', image: require('../assets/images/template/feminine.png') },
+    { id: 'crystalClear', name: 'Kristal Netlik', image: require('../assets/images/template/crystal.png') },
   ];
 
   const [selectedId, setSelectedId] = useState<TemplateId>('modern');
