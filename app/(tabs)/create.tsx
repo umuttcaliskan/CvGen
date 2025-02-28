@@ -13,7 +13,7 @@ import LanguagesModal from '../../components/CreateCV/LanguagesModal';
 import ReferencesModal from '../../components/CreateCV/ReferencesModal';
 import SocialMediaModal from '../../components/CreateCV/SocialMediaModal';
 import ProjectsModal from '../../components/CreateCV/ProjectsModal';
-import { firebase, firestore } from '../../firebase.config';
+import { firebase, firestore } from '../../firebaseConfig';
 
 interface CVSection {
   id: string;

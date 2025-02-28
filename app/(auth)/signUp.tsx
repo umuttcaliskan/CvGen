@@ -4,7 +4,7 @@ import { Link, router } from 'expo-router';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-import DateTimePickerModal from 'react-native-modal-datetime-picker'; // Takvim modülünü import et
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 const SignUpScreen: React.FC = () => {
   const [email, setEmail] = useState<string>('');
@@ -14,7 +14,7 @@ const SignUpScreen: React.FC = () => {
   const [birthDate, setBirthDate] = useState<string>('');
   const [secureTextEntry, setSecureTextEntry] = useState<boolean>(true);
   const [secureConfirmTextEntry, setSecureConfirmTextEntry] = useState<boolean>(true);
-  const [isDatePickerVisible, setDatePickerVisible] = useState<boolean>(false); // Takvim görünürlüğünü kontrol et
+  const [isDatePickerVisible, setDatePickerVisible] = useState<boolean>(false);
 
   const handleSignUp = async () => {
     if (!email || !password || !confirmPassword || !fullName || !birthDate) {

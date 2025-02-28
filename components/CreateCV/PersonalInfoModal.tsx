@@ -3,7 +3,6 @@ import { View, Text, Modal, TextInput, TouchableOpacity, ScrollView, SafeAreaVie
 import { Feather } from '@expo/vector-icons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Picker } from '@react-native-picker/picker';
-import { firebase } from '../../firebaseConfig';
 import { useAuth } from '../../context/AuthContext';
 
 interface PersonalInfoModalProps {

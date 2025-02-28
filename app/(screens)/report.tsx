@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView, SafeAreaView } from 'react-native';
 import { Stack } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-import { firebase } from '../../firebase.config';
+import { firebase } from '../../firebaseConfig';
 import { useAuth } from '../../context/AuthContext';
 
 const ReportScreen: React.FC = () => {

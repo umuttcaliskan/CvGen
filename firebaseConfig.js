@@ -15,6 +15,7 @@ const firebaseConfig = {
 };
 
 let app;
+let isConnected = true;
 
 if (!firebase.apps.length) {
     app = firebase.initializeApp(firebaseConfig);
@@ -22,8 +23,48 @@ if (!firebase.apps.length) {
     initializeAuth(app, {
         persistence: getReactNativePersistence(AsyncStorage)
     });
+    
+    // Firestore için offline depolama ayarları
+    firebase.firestore().settings({
+        cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
+    });
+
+    // Firestore kalıcılık özelliğini etkinleştir
+    firebase.firestore().enablePersistence({
+        synchronizeTabs: true
+    }).catch((err) => {
+        if (err.code === 'failed-precondition') {
+            console.warn('Persistence failed: Multiple tabs open');
+        } else if (err.code === 'unimplemented') {
+            console.warn('Persistence is not available');
+        }
+    });
 }
 
 const firestore = firebase.firestore();
+
+// Ağ bağlantısını etkinleştir ve durumunu izle
+firebase.firestore().enableNetwork()
+    .then(() => {
+        console.log('Network bağlantısı başarılı');
+        isConnected = true;
+    })
+    .catch((err) => {
+        console.error('Network bağlantı hatası:', err);
+        isConnected = false;
+    });
+
+// Bağlantı durumunu gerçek zamanlı izleme
+firestore.collection('_').onSnapshot(() => {
+    if (!isConnected) {
+        console.log('Network bağlantısı geri geldi');
+        isConnected = true;
+    }
+}, (error) => {
+    if (error.code === 'unavailable') {
+        console.log('Network bağlantısı koptu');
+        isConnected = false;
+    }
+});
 
 export { firebase, firestore };

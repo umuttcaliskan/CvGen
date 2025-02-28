@@ -3,7 +3,7 @@ import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, ActivityIndicat
 import { router } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import { Feather } from '@expo/vector-icons';
-import { firebase } from '../../firebase.config';
+import { firebase } from '../../firebaseConfig';
 import Modal from 'react-native-modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Print from 'expo-print';
