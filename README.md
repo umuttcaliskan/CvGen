@@ -1,98 +1,106 @@
-# PickSoSo CV Maker 📝
+# CvGen - Profesyonel CV Oluşturma Uygulaması
 
-PickSoSo CV Maker, profesyonel özgeçmişler oluşturmanıza yardımcı olan modern bir mobil uygulamadır. Expo ve React Native teknolojileri kullanılarak geliştirilmiştir.
+CvGen, kullanıcıların kolayca profesyonel özgeçmişler oluşturmasını, düzenlemesini ve paylaşmasını sağlayan bir mobil uygulamadır. Modern ve kullanıcı dostu arayüzü ile CV oluşturma sürecini basitleştirir ve çeşitli şablonlar sunar.
 
-## 🚀 Özellikler
+![CvGen Logo](./assets/images/logo/cvgen.png)
 
-- 📱 Kullanıcı dostu arayüz
-- 🎨 Profesyonel CV şablonları
-- 💾 Otomatik kaydetme
-- 📤 PDF olarak dışa aktarma
-- 🔄 Gerçek zamanlı önizleme
-- 🌐 Çevrimdışı çalışma desteği
-- 🔒 Güvenli veri saklama
+## 🌟 Özellikler
 
-## 🛠 Kurulum
+- **Kolay CV Oluşturma**: Adım adım rehberlik ile hızlı ve kolay CV oluşturma
+- **Çoklu Şablonlar**: Farklı iş pozisyonları için uyarlanmış profesyonel şablonlar
+- **PDF Dışa Aktarma**: Oluşturulan CV'leri PDF formatında dışa aktarma ve paylaşma
+- **Kullanıcı Hesapları**: CV'lerinizi kaydetmek ve yönetmek için kullanıcı hesapları
+- **Kişiselleştirme**: CV'nizi kişiselleştirmek için geniş seçenekler:
+  - Kişisel bilgiler
+  - Eğitim geçmişi
+  - İş deneyimi
+  - Beceriler
+  - Dil yetkinlikleri
+  - Referanslar
+  - Sosyal medya profilleri
+  - Projeler
+  - Sertifikalar
+- **Kariyer İpuçları**: CV'nizi geliştirmek için profesyonel ipuçları
+- **Blog**: Kariyer gelişimi hakkında bilgilendirici makaleler
 
-1. Depoyu klonlayın:
+## 📱 Desteklenen Platformlar
+
+- iOS
+- Android
+
+## 🚀 Başlangıç
+
+### Ön Koşullar
+
+- Node.js (v14 veya üzeri)
+- npm veya yarn
+- Expo CLI
+- iOS için Xcode (iOS geliştirmesi için)
+- Android için Android Studio (Android geliştirmesi için)
+
+### Kurulum
+
+1. Repoyu klonlayın:
    ```bash
-   git clone https://github.com/yourusername/picksoso-cv-maker.git
+   git clone https://github.com/kullaniciadi/cvgen.git
+   cd cvgen
    ```
 
 2. Bağımlılıkları yükleyin:
    ```bash
    npm install
+   # veya
+   yarn install
    ```
 
-3. Uygulamayı başlatın:
+3. Firebase yapılandırması:
+   - `config.example.js` dosyasını `config.js` olarak kopyalayın
+   - Firebase projesi oluşturun ve kimlik bilgilerinizi `config.js` dosyasına ekleyin
+
+4. Uygulamayı başlatın:
    ```bash
-   npx expo start
+   npm start
+   # veya
+   yarn start
    ```
 
-## 📱 Uygulama Çalıştırma Seçenekleri
+## 🛠️ Geliştirme
 
-Uygulamayı aşağıdaki platformlarda test edebilirsiniz:
-
-- 📲 iOS Simulator
-- 🤖 Android Emulator
-- 📱 Expo Go uygulaması (iOS/Android)
-- 🌐 Web tarayıcı
-
-## 🔧 Geliştirme
-
-Bu proje aşağıdaki teknolojileri kullanmaktadır:
-
-- ⚛️ React Native
-- 📱 Expo
-- 🔥 Firebase
-- 🎨 TailwindCSS (NativeWind)
-- 📍 Expo Router
-
-## �� Proje Yapısı
+### Proje Yapısı
 
 ```
-picksoso-cv-maker/
-├── app/                    # Ana uygulama dosyaları
-│   ├── (auth)/            # Kimlik doğrulama ekranları
-│   ├── (screens)/         # Uygulama ekranları
-│   └── (tabs)/            # Tab navigasyon ekranları
-├── components/            # Yeniden kullanılabilir bileşenler
-├── context/              # Context API dosyaları
-├── lib/                  # Yardımcı fonksiyonlar ve şablonlar
-└── utils/                # Yardımcı araçlar
+cvgen/
+├── app/                    # Expo Router tabanlı uygulama ekranları
+│   ├── (auth)/             # Kimlik doğrulama ekranları
+│   ├── (screens)/          # Diğer ekranlar
+│   └── (tabs)/             # Ana sekme ekranları
+├── assets/                 # Resimler, fontlar ve diğer statik dosyalar
+├── components/             # Yeniden kullanılabilir bileşenler
+├── context/                # React Context API ile durum yönetimi
+├── hooks/                  # Özel React hooks
+├── lib/                    # Yardımcı kütüphaneler
+├── utils/                  # Yardımcı fonksiyonlar
+└── ...
 ```
 
-## 🔐 Firebase Yapılandırması
+### Kullanılan Teknolojiler
 
-1. Firebase Console'dan yeni bir proje oluşturun
-2. Kimlik doğrulama ve Firestore'u etkinleştirin
-3. Firebase yapılandırma bilgilerinizi `firebaseConfig.ts` dosyasına ekleyin
-
-## 🤝 Katkıda Bulunma
-
-1. Bu depoyu fork edin
-2. Yeni bir özellik dalı oluşturun (`git checkout -b feature/amazing-feature`)
-3. Değişikliklerinizi commit edin (`git commit -m 'feat: Add amazing feature'`)
-4. Dalınıza push yapın (`git push origin feature/amazing-feature`)
-5. Bir Pull Request oluşturun
+- **React Native**: Mobil uygulama geliştirme
+- **Expo**: Geliştirme araçları ve kütüphaneleri
+- **Firebase**: Kimlik doğrulama ve veritabanı
+- **NativeWind**: Tailwind CSS benzeri stil sistemi
+- **Expo Router**: Navigasyon sistemi
 
 ## 📄 Lisans
 
-Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
+Bu proje [MIT Lisansı](LICENSE) altında lisanslanmıştır.
 
 ## 📞 İletişim
 
-PickSoSo - [@picksoso](https://instagram.com/picksoso_)
-
-E-posta: destek@picksoso.com
-Web: www.picksoso.com
-
-## 🙏 Teşekkürler
-
-- [Expo](https://expo.dev)
-- [React Native](https://reactnative.dev)
-- [Firebase](https://firebase.google.com)
-- [NativeWind](https://www.nativewind.dev)
+Sorularınız veya geri bildirimleriniz için:
+- Email: [destek@cvgen.com.tr](mailto:destek@cvgen.com.tr)
+- Web: [www.cvgen.com.tr](https://www.cvgen.com)
 
 ---
-Developed with ❤️ by PickSoSo Team
+
+Geliştirici: Umut Çalışkan (https://github.com/umuttcaliskan) 
