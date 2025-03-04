@@ -2,7 +2,7 @@ import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
-import 'firebase/compat/firestore'; // Firestore'u içe aktar
+import 'firebase/compat/firestore';
 import { firebaseConfig } from './config';
 
 let app;
@@ -19,7 +19,6 @@ if (!firebase.apps.length) {
     firebase.firestore().settings({
         cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
         merge: true,
-        // Çoklu sekme desteği ile kalıcılık özelliğini etkinleştir
         persistence: true,
         synchronizeTabs: true
     });
