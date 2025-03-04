@@ -12,6 +12,7 @@ import Preference from '../../components/ProfileComponents/Preference';
 import { useAuth } from '../../context/AuthContext';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { LinearGradient } from 'expo-linear-gradient';
+import { version } from '../../package.json';
 
 const Profile = () => {
   const { user, userData } = useAuth();
@@ -203,6 +204,8 @@ const Profile = () => {
                 <View className="h-[1px] bg-gray-100 my-2" />
                 <ProfileButton title="Hata Bildir" route="../(screens)/report" icon="alert-triangle" />
                 <View className="h-[1px] bg-gray-100 my-2" />
+                <ProfileButton title="CvGen Blog" route="../(screens)/blog" icon="book-open" />
+                <View className="h-[1px] bg-gray-100 my-2" />
                 <ProfileButton title="Uygulamayı Değerlendir" route="./home" icon="star" />
                 <View className="h-[1px] bg-gray-100 my-2" />
                 <ProfileButton title="Gizlilik Sözleşmesi" route="../(screens)/privacy" icon="shield" />
@@ -226,7 +229,7 @@ const Profile = () => {
             {/* Alt Bilgi */}
             <View className="mb-8 items-center">
               <Text className="text-xs text-gray-400">Powered by PickSoSo</Text>
-              <Text className="text-[8px] text-gray-400 mt-1">Version 1.0.0</Text>
+              <Text className="text-[8px] text-gray-400 mt-1">Version {version}</Text>
             </View>
           </View>
         </ScrollView>

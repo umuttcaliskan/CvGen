@@ -1,4 +1,4 @@
-package com.picksoso.CvGen
+package com.picksoso.cvgen
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build
@@ -10,6 +10,7 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnable
 import com.facebook.react.defaults.DefaultReactActivityDelegate
 
 import expo.modules.ReactActivityDelegateWrapper
+import com.picksoso.cvgen.BuildConfig  // Küçük harfle cvgen
 
 class MainActivity : ReactActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,7 +37,7 @@ class MainActivity : ReactActivity() {
   override fun createReactActivityDelegate(): ReactActivityDelegate {
     return ReactActivityDelegateWrapper(
           this,
-          BuildConfig.IS_NEW_ARCHITECTURE_ENABLED,
+          false,
           object : DefaultReactActivityDelegate(
               this,
               mainComponentName,
