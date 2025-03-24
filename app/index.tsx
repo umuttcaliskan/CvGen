@@ -31,14 +31,6 @@ const SplashScreen = () => {
           className="w-[400px] h-[120px]"
           resizeMode="contain"
         />
-
-        {/*
-
-        <Text className="text-2xl font-bold mt-6 text-white">
-          CV Maker
-        </Text> 
-
-        */}
         
         <Text className="text-lg text-gray-200 mt-2">
           Senin için en iyi cv şablonları oluşturuluyor...
