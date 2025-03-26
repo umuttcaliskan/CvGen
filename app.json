@@ -2,7 +2,7 @@
   "expo": {
     "name": "CvGen",
     "slug": "cvgen",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "myapp",
@@ -44,7 +44,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "90296090-0784-4e59-aa72-091256c241aa"
+        "projectId": "eb29ec73-0549-4f20-a0ea-22bdb896511d"
       }
     },
     "owner": "picksoso"
